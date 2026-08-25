@@ -1,4 +1,4 @@
-<p align="right"><a href="README.en.md">🇬🇧 English</a></p>
+<p align="right"><a href="README.en.md">English</a></p>
 
 <h1 align="center">Grados y Megavatios</h1>
 
@@ -73,17 +73,17 @@ Se descartó **ESIOS** deliberadamente: ofrece los mismos datos pero exige un to
 
 | # | Fase | Estado |
 |:--:|---|:--:|
-| 0 | Caso y dataset | ✅ |
-| 1 | [Arquitectura](docs/fase-1-arquitectura/) | ✅ |
-| 2 | [Repositorio y estructura](docs/fase-2-repositorio/) | ✅ |
-| 3 | Terraform: backend, S3, IAM, Glue DB, Athena | ⬜ |
-| 4 | Ingesta: Lambdas con reintentos | ⬜ |
-| 5 | Transformación: Glue + PySpark | ⬜ |
-| 6 | Consulta: Athena | ⬜ |
-| 7 | Orquestación: Step Functions | ⬜ |
-| 8 | CI/CD: GitHub Actions | ⬜ |
-| 9 | Documentación final | ⬜ |
-| 10 | Teardown | ⬜ |
+| 0 | Caso y dataset | Cerrada |
+| 1 | [Arquitectura](docs/fase-1-arquitectura/) | Cerrada |
+| 2 | [Repositorio y estructura](docs/fase-2-repositorio/) | Cerrada |
+| 3 | Terraform: backend, S3, IAM, Glue DB, Athena | Pendiente |
+| 4 | Ingesta: Lambdas con reintentos | Pendiente |
+| 5 | Transformación: Glue + PySpark | Pendiente |
+| 6 | Consulta: Athena | Pendiente |
+| 7 | Orquestación: Step Functions | Pendiente |
+| 8 | CI/CD: GitHub Actions | Pendiente |
+| 9 | Documentación final | Pendiente |
+| 10 | Teardown | Pendiente |
 
 Cada fase cerrada deja su carpeta en [`docs/`](docs/) con el diagrama, el PDF y las decisiones razonadas.
 

@@ -25,17 +25,17 @@ docs/fase-N-nombre/
 
 | Fase | Título | Estado |
 |---|---|---|
-| 0 | Caso y dataset | ✅ Cerrada |
-| 1 | Arquitectura | ✅ Cerrada — [`fase-1-arquitectura/`](fase-1-arquitectura/) |
-| 2 | Repo, estructura y `.gitignore` | ✅ Cerrada — [`fase-2-repositorio/`](fase-2-repositorio/) |
-| 3 | Terraform: backend, S3, IAM, Glue DB, Athena | ⬜ Pendiente |
-| 4 | Ingesta: Lambdas con reintentos | ⬜ Pendiente |
-| 5 | Transformación: Glue + PySpark | ⬜ Pendiente |
-| 6 | Consulta: Athena | ⬜ Pendiente |
-| 7 | Orquestación: Step Functions | ⬜ Pendiente |
-| 8 | CI/CD: GitHub Actions | ⬜ Pendiente |
-| 9 | Documentación final | ⬜ Pendiente |
-| 10 | Teardown | ⬜ Pendiente |
+| 0 | Caso y dataset | Cerrada |
+| 1 | Arquitectura | Cerrada — [`fase-1-arquitectura/`](fase-1-arquitectura/) |
+| 2 | Repo, estructura y `.gitignore` | Cerrada — [`fase-2-repositorio/`](fase-2-repositorio/) |
+| 3 | Terraform: backend, S3, IAM, Glue DB, Athena | Pendiente |
+| 4 | Ingesta: Lambdas con reintentos | Pendiente |
+| 5 | Transformación: Glue + PySpark | Pendiente |
+| 6 | Consulta: Athena | Pendiente |
+| 7 | Orquestación: Step Functions | Pendiente |
+| 8 | CI/CD: GitHub Actions | Pendiente |
+| 9 | Documentación final | Pendiente |
+| 10 | Teardown | Pendiente |
 
 ## Regenerar un PDF
 

@@ -1,4 +1,4 @@
-<p align="right"><a href="README.md">🇪🇸 Español</a></p>
+<p align="right"><a href="README.md">Español</a></p>
 
 <h1 align="center">Degrees and Megawatts</h1>
 
@@ -75,17 +75,17 @@ Both **public and token-free**. Verified before anything was designed.
 
 | # | Phase | Status |
 |:--:|---|:--:|
-| 0 | Use case and dataset | ✅ |
-| 1 | [Architecture](docs/fase-1-arquitectura/) | ✅ |
-| 2 | [Repository and structure](docs/fase-2-repositorio/) | ✅ |
-| 3 | Terraform: backend, S3, IAM, Glue DB, Athena | ⬜ |
-| 4 | Ingestion: Lambdas with retries | ⬜ |
-| 5 | Transformation: Glue + PySpark | ⬜ |
-| 6 | Query: Athena | ⬜ |
-| 7 | Orchestration: Step Functions | ⬜ |
-| 8 | CI/CD: GitHub Actions | ⬜ |
-| 9 | Final documentation | ⬜ |
-| 10 | Teardown | ⬜ |
+| 0 | Use case and dataset | Done |
+| 1 | [Architecture](docs/fase-1-arquitectura/) | Done |
+| 2 | [Repository and structure](docs/fase-2-repositorio/) | Done |
+| 3 | Terraform: backend, S3, IAM, Glue DB, Athena | Pending |
+| 4 | Ingestion: Lambdas with retries | Pending |
+| 5 | Transformation: Glue + PySpark | Pending |
+| 6 | Query: Athena | Pending |
+| 7 | Orchestration: Step Functions | Pending |
+| 8 | CI/CD: GitHub Actions | Pending |
+| 9 | Final documentation | Pending |
+| 10 | Teardown | Pending |
 
 Every closed phase leaves a folder in [`docs/`](docs/) with its diagram, a PDF and the reasoning behind each decision.
 
