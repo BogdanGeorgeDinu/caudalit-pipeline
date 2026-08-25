@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Grados y Megavatios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+
+<style>
+  :root{
+    --bg:#07161A; --surface:#0D2025; --surface-2:#12292F;
+    --ink:#E7F1F0; --muted:#8AA5A5; --line:#1C363C; --line-strong:#294950;
+    --accent:#2FD6C6; --accent-2:#43C0F0; --accent-ink:#65E6D8; --on-accent:#04231F;
+    --warn:#E8B84B;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:56px 24px 80px}
+
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--accent-ink); margin:0 0 18px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--accent);border-radius:2px}
+
+  h1{
+    font-family:"Sora",sans-serif; font-weight:800; letter-spacing:-.035em;
+    font-size:clamp(2.1rem,5.5vw,3.4rem); line-height:1.02; margin:0;
+    text-wrap:balance; max-width:18ch;
+  }
+  h1 .flow{background:linear-gradient(100deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+
+  .question{
+    margin:32px 0 0; padding:22px 26px; border-left:3px solid var(--accent);
+    background:var(--surface); border-radius:0 12px 12px 0; max-width:70ch;
+  }
+  .question .q-label{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px;
+  }
+  .question p{
+    margin:0;font-family:"Sora",sans-serif;font-weight:600;font-size:1.22rem;
+    line-height:1.35;letter-spacing:-.015em;text-wrap:balance;
+  }
+
+  h2{
+    font-family:"Sora",sans-serif;font-weight:700;letter-spacing:-.025em;
+    font-size:1.7rem;margin:0 0 6px;line-height:1.1;
+  }
+  .sec{margin-top:72px}
+  .sec-lead{color:var(--muted);margin:0 0 28px;max-width:64ch}
+
+  figure{margin:0}
+  .figbox{
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    padding:22px 20px 14px;box-shadow:var(--shadow);overflow-x:auto;
+  }
+  .figbox svg{display:block;width:100%;min-width:820px;height:auto}
+  figcaption{color:var(--muted);font-size:.92rem;margin-top:16px;max-width:72ch}
+
+  .flowline{stroke-dasharray:5 4;animation:march 2.4s linear infinite}
+  @keyframes march{to{stroke-dashoffset:-18}}
+  @media (prefers-reduced-motion:reduce){.flowline{animation:none;stroke-dasharray:none}}
+
+  .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+  .stage{
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:20px;display:flex;flex-direction:column;
+  }
+  .stage .n{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent-ink);
+    letter-spacing:.1em;margin-bottom:10px;
+  }
+  .stage h3{
+    font-family:"Sora",sans-serif;font-weight:600;font-size:1.06rem;
+    margin:0 0 8px;letter-spacing:-.01em;
+  }
+  .stage p{margin:0;color:var(--muted);font-size:.94rem}
+  .stage .why{
+    margin-top:14px;padding-top:12px;border-top:1px solid var(--line);
+    font-size:.89rem;color:var(--muted);
+  }
+  .stage .why b{color:var(--ink);font-weight:600}
+
+  .decisions{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+  .dec{
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;
+    display:flex;gap:15px;
+  }
+  .dec .mark{
+    width:34px;height:34px;border-radius:9px;flex-shrink:0;
+    background:linear-gradient(135deg,rgba(47,214,198,.18),rgba(67,192,240,.14));
+    display:flex;align-items:center;justify-content:center;color:var(--accent-ink);
+    font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:500;
+  }
+  .dec h3{font-family:"Sora",sans-serif;font-weight:600;font-size:1.02rem;margin:4px 0 7px;letter-spacing:-.01em}
+  .dec p{margin:0;color:var(--muted);font-size:.93rem}
+
+  .cost{
+    margin-top:28px;background:var(--surface-2);border:1px solid var(--line-strong);
+    border-left:3px solid var(--warn);border-radius:0 14px 14px 0;padding:24px 26px;
+  }
+  .cost h3{
+    font-family:"Sora",sans-serif;font-weight:600;font-size:1.06rem;margin:0 0 10px;
+    display:flex;align-items:center;gap:9px;
+  }
+  .cost h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--warn);flex-shrink:0}
+  .cost p{margin:0 0 10px;color:var(--muted);font-size:.95rem;max-width:76ch}
+  .cost p:last-child{margin-bottom:0}
+  .cost b{color:var(--ink);font-weight:600}
+
+  table{width:100%;border-collapse:collapse;margin-top:24px;font-size:.93rem}
+  caption{
+    text-align:left;color:var(--muted);font-size:.9rem;margin-bottom:12px;
+  }
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)}
+  th{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);font-weight:500;
+  }
+  td code{
+    font-family:"IBM Plex Mono",monospace;font-size:.85rem;color:var(--accent-ink);
+    background:var(--surface-2);padding:2px 7px;border-radius:5px;
+  }
+  td.ok{color:var(--accent-ink);font-variant-numeric:tabular-nums}
+  .tablewrap{overflow-x:auto}
+
+  .next{
+    margin-top:72px;padding-top:28px;border-top:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;justify-content:space-between;
+    color:var(--muted);font-size:.9rem;
+  }
+  .next .brand{font-family:"Sora",sans-serif;font-weight:700;color:var(--ink)}
+  .next .it{color:var(--accent-ink)}
+
+  @media (max-width:860px){
+    .stages{grid-template-columns:repeat(2,1fr)}
+    .decisions{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    .wrap{padding:40px 18px 60px}
+    .stages{grid-template-columns:1fr}
+  }
+
+  /* ---- Impresión / PDF: A4 a sangre, una sección por página ---- */
+  @media print{
+    @page{size:A4;margin:0}
+    html,body{background:var(--bg)}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{font-size:13.5px}
+    .wrap{max-width:none;padding:16mm 14mm}
+
+    /* flujo continuo: las páginas se llenan solas y nada se parte */
+    .sec{margin-top:34px}
+
+    h1{font-size:2.35rem}
+    h2{font-size:1.5rem}
+    .question{margin-top:24px;padding:18px 22px}
+    .question p{font-size:1.1rem}
+
+    /* el diagrama debe caber en el ancho de página, no desbordar */
+    .figbox{overflow:visible;padding:16px 14px}
+    .figbox svg{min-width:0}
+
+    /* el ancho de A4 (~794px) dispara la regla de 860px: la anulamos aquí */
+    .stages{grid-template-columns:repeat(2,1fr);gap:12px}
+    .decisions{grid-template-columns:repeat(2,1fr);gap:12px}
+
+    /* nada de tarjetas partidas por la mitad */
+    .stage,.dec,.cost,figure,.question,.tablewrap,table,tr,.next{break-inside:avoid}
+    .tablewrap{overflow:visible}
+
+    .next{margin-top:34px}
+    .flowline{animation:none;stroke-dasharray:none}
+  }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Fase 1 · Arquitectura</p>
+  <h1>Un pipeline para que los datos <span class="flow">fluyan.</span></h1>
+
+  <div class="question">
+    <span class="q-label">La pregunta de negocio</span>
+    <p>¿Cuánto sube la demanda eléctrica peninsular por cada grado de temperatura, y a qué horas se paga más cara esa energía?</p>
+  </div>
+
+  <section class="sec">
+    <h2>El recorrido del dato</h2>
+    <p class="sec-lead">Dos fuentes públicas independientes que solo tienen una cosa en común: la hora. Cruzarlas es el trabajo.</p>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 1000 360" role="img"
+             aria-label="Diagrama del pipeline: las APIs de REE y Open-Meteo se ingieren con dos Lambdas independientes que escriben JSON en S3 raw; un job de Glue con PySpark las une por hora y escribe parquet particionado por fecha en S3 curated, que se consulta con Athena sobre el Glue Data Catalog. Step Functions orquesta las etapas y Terraform, GitHub Actions y CloudWatch sostienen todo el conjunto.">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="#2FD6C6"/>
+            </marker>
+            <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#2FD6C6"/>
+              <stop offset="1" stop-color="#43C0F0"/>
+            </linearGradient>
+          </defs>
+
+          <!-- ORQUESTACIÓN -->
+          <rect x="188" y="52" width="792" height="40" rx="10"
+                fill="none" stroke="#294950" stroke-dasharray="6 5"/>
+          <text x="584" y="77" text-anchor="middle" font-family="IBM Plex Mono, monospace"
+                font-size="11.5" fill="#8AA5A5">
+            Step Functions · orquesta el orden, reintenta lo que falla, avisa si algo se rompe
+          </text>
+          <line x1="248" y1="92" x2="248" y2="114" stroke="#294950" stroke-dasharray="3 3"/>
+          <line x1="584" y1="92" x2="584" y2="153" stroke="#294950" stroke-dasharray="3 3"/>
+          <line x1="920" y1="92" x2="920" y2="153" stroke="#294950" stroke-dasharray="3 3"/>
+
+          <!-- FUENTES -->
+          <rect x="20" y="118" width="120" height="58" rx="10" fill="#12292F" stroke="#2FD6C6"/>
+          <text x="80" y="141" text-anchor="middle" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">REE apidatos</text>
+          <text x="80" y="158" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">demanda · precio</text>
+          <text x="80" y="170" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#65E6D8">sin token</text>
+
+          <rect x="20" y="196" width="120" height="58" rx="10" fill="#12292F" stroke="#43C0F0"/>
+          <text x="80" y="219" text-anchor="middle" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Open-Meteo</text>
+          <text x="80" y="236" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">temperatura</text>
+          <text x="80" y="248" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#65E6D8">sin token</text>
+
+          <!-- INGESTA -->
+          <rect x="188" y="118" width="120" height="58" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="248" y="143" text-anchor="middle" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Lambda</text>
+          <text x="248" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">ingesta REE</text>
+
+          <rect x="188" y="196" width="120" height="58" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="248" y="221" text-anchor="middle" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Lambda</text>
+          <text x="248" y="238" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">ingesta clima</text>
+
+          <!-- ETAPAS COMUNES -->
+          <rect x="356" y="157" width="120" height="58" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="416" y="182" text-anchor="middle" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">S3 · raw</text>
+          <text x="416" y="199" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">JSON tal cual</text>
+
+          <rect x="524" y="157" width="120" height="58" rx="10" fill="#0D2025" stroke="url(#grad)" stroke-width="1.6"/>
+          <text x="584" y="178" text-anchor="middle" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Glue + PySpark</text>
+          <text x="584" y="194" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#65E6D8">join por hora</text>
+          <text x="584" y="206" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8AA5A5">+ calidad</text>
+
+          <rect x="692" y="157" width="120" height="58" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="752" y="178" text-anchor="middle" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">S3 · curated</text>
+          <text x="752" y="194" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">parquet</text>
+          <text x="752" y="206" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8AA5A5">/anio/mes/dia</text>
+
+          <rect x="860" y="157" width="120" height="58" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="920" y="178" text-anchor="middle" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Athena</text>
+          <text x="920" y="194" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">Glue Catalog</text>
+          <text x="920" y="206" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8AA5A5">SQL</text>
+
+          <!-- FLECHAS: fuentes -> lambdas -->
+          <line class="flowline" x1="144" y1="147" x2="180" y2="147" stroke="#2FD6C6" stroke-width="1.6" marker-end="url(#ar)"/>
+          <text x="162" y="139" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8AA5A5">HTTP</text>
+
+          <line class="flowline" x1="144" y1="225" x2="180" y2="225" stroke="#43C0F0" stroke-width="1.6" marker-end="url(#ar)"/>
+          <text x="162" y="217" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8AA5A5">HTTP</text>
+
+          <!-- CONVERGENCIA hacia S3 raw -->
+          <polyline points="312,147 332,147 332,186" fill="none" stroke="#2FD6C6" stroke-width="1.6"/>
+          <polyline points="312,225 332,225 332,186" fill="none" stroke="#43C0F0" stroke-width="1.6"/>
+          <line class="flowline" x1="332" y1="186" x2="348" y2="186" stroke="url(#grad)" stroke-width="1.8" marker-end="url(#ar)"/>
+
+          <!-- FLECHAS: etapas comunes -->
+          <line class="flowline" x1="480" y1="186" x2="516" y2="186" stroke="#2FD6C6" stroke-width="1.6" marker-end="url(#ar)"/>
+          <text x="498" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8AA5A5">crudo</text>
+
+          <line class="flowline" x1="648" y1="186" x2="684" y2="186" stroke="#2FD6C6" stroke-width="1.6" marker-end="url(#ar)"/>
+          <text x="666" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8AA5A5">limpio</text>
+
+          <line class="flowline" x1="816" y1="186" x2="852" y2="186" stroke="#2FD6C6" stroke-width="1.6" marker-end="url(#ar)"/>
+          <text x="834" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8AA5A5">consulta</text>
+
+          <!-- BASE: todo como código -->
+          <line x1="248" y1="258" x2="248" y2="284" stroke="#294950" stroke-dasharray="3 3"/>
+          <line x1="584" y1="219" x2="584" y2="284" stroke="#294950" stroke-dasharray="3 3"/>
+          <line x1="920" y1="219" x2="920" y2="284" stroke="#294950" stroke-dasharray="3 3"/>
+          <rect x="20" y="284" width="960" height="42" rx="10" fill="#12292F" stroke="#294950"/>
+          <text x="500" y="310" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#8AA5A5">
+            Terraform · todo como código   —   GitHub Actions · fmt / validate / plan en cada PR   —   CloudWatch · logs, métricas y alarmas
+          </text>
+        </svg>
+      </div>
+      <figcaption>
+        Las dos fuentes se ingieren por separado y aterrizan crudas en S3: si mañana cambia el esquema de una,
+        la otra sigue funcionando. El cruce por hora ocurre una sola vez, en Glue, y a partir de ahí ya hay
+        una única tabla que responde la pregunta.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="sec">
+    <h2>Qué hace cada etapa, y por qué</h2>
+    <p class="sec-lead">Seis etapas. Ninguna está ahí por adorno: cada una resuelve un problema que la anterior deja abierto.</p>
+
+    <div class="stages">
+      <div class="stage">
+        <span class="n">01</span>
+        <h3>Fuentes</h3>
+        <p>REE publica demanda y precio horarios; Open-Meteo publica temperatura horaria. Ambas abiertas, sin registro.</p>
+        <div class="why"><b>Por qué así:</b> ninguna pide token, así que el proyecto arranca hoy en vez de esperar días a que alguien conteste un correo.</div>
+      </div>
+
+      <div class="stage">
+        <span class="n">02</span>
+        <h3>Ingesta</h3>
+        <p>Una Lambda por fuente. Piden un rango de fechas, reintentan con backoff y escriben la respuesta sin tocarla.</p>
+        <div class="why"><b>Por qué así:</b> la API de REE devuelve errores 400 intermitentes aunque la petición sea correcta. Sin reintentos, el pipeline es una lotería.</div>
+      </div>
+
+      <div class="stage">
+        <span class="n">03</span>
+        <h3>S3 raw</h3>
+        <p>El JSON original, tal cual llegó, particionado por fecha de ingesta. No se transforma nada aquí.</p>
+        <div class="why"><b>Por qué así:</b> si mañana descubro un fallo en la transformación, puedo reprocesar desde el origen sin volver a pedir nada a la API.</div>
+      </div>
+
+      <div class="stage">
+        <span class="n">04</span>
+        <h3>Transformación</h3>
+        <p>Glue con PySpark: aplana el JSON, valida rangos, normaliza zonas horarias y une las tres series por hora.</p>
+        <div class="why"><b>Por qué así:</b> el <i>join</i> es el corazón del proyecto. Y las horas vienen con offset (+01:00 / +02:00): si no se normaliza, marzo y octubre salen mal.</div>
+      </div>
+
+      <div class="stage">
+        <span class="n">05</span>
+        <h3>S3 curated</h3>
+        <p>Una tabla en parquet, particionada por año/mes/día, lista para consultar.</p>
+        <div class="why"><b>Por qué así:</b> Athena cobra por terabyte escaneado. Parquet más particiones convierte un escaneo completo en leer solo los días que preguntas.</div>
+      </div>
+
+      <div class="stage">
+        <span class="n">06</span>
+        <h3>Consulta</h3>
+        <p>Glue Data Catalog registra el esquema y Athena lo consulta con SQL corriente.</p>
+        <div class="why"><b>Por qué así:</b> cierra el círculo. El dato deja de ser un archivo en un bucket y pasa a ser algo a lo que el negocio le puede preguntar.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Las decisiones de esta fase</h2>
+    <p class="sec-lead">Cuatro cosas que podrían haber sido de otra manera, y el motivo de que no lo sean.</p>
+
+    <div class="decisions">
+      <div class="dec">
+        <div class="mark">01</div>
+        <div>
+          <h3>apidatos en vez de ESIOS</h3>
+          <p>ESIOS da los mismos datos pero exige un token que se pide por correo y tarda días. <code>apidatos.ree.es</code> es pública y devuelve lo mismo ahora mismo. Elegir la fuente que no te bloquea es una decisión de arquitectura, no un atajo.</p>
+        </div>
+      </div>
+
+      <div class="dec">
+        <div class="mark">02</div>
+        <div>
+          <h3>Dos fuentes, no una</h3>
+          <p>Con solo los datos de REE esto sería un copiador de ficheros. Meter la temperatura obliga a resolver esquemas distintos, zonas horarias y un cruce por clave — que es exactamente el trabajo real de un pipeline.</p>
+        </div>
+      </div>
+
+      <div class="dec">
+        <div class="mark">03</div>
+        <div>
+          <h3>Step Functions, no Airflow</h3>
+          <p>MWAA cuesta unos cientos de euros al mes aunque no lo uses. Step Functions se paga por transición y aquí sale prácticamente gratis. Airflow se justifica con decenas de DAGs; con tres pasos, no.</p>
+        </div>
+      </div>
+
+      <div class="dec">
+        <div class="mark">04</div>
+        <div>
+          <h3>Raw y curated separados</h3>
+          <p>Podría transformar al vuelo y guardar solo el resultado. Pero entonces cada fallo en la lógica significaría volver a pedirle todo el histórico a una API que ya falla sola. El raw es el seguro.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Lo que hay que vigilar</h2>
+
+    <div class="cost">
+      <h3><span class="dot"></span>Glue es el único servicio del stack que puede dar un susto</h3>
+      <p><b>S3, Lambda, Step Functions y Athena</b> caben de sobra en capa gratuita con este volumen de datos — hablamos de kilobytes por día.</p>
+      <p><b>Glue no tiene capa gratuita.</b> Se factura por DPU-hora con un mínimo por ejecución. Un job en bucle o —el clásico— un <i>crawler</i> dejado en <i>schedule</i> es lo que se come el presupuesto. Por eso: mínimo de DPUs, crawlers bajo demanda y nunca programados, presupuesto con alerta configurado <i>antes</i> de crear nada, y <code>terraform destroy</code> al cerrar cada sesión de pruebas.</p>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <caption>Ambas APIs verificadas antes de dibujar nada. Los datos de ejemplo son de una llamada real al 1 de marzo de 2024.</caption>
+        <thead>
+          <tr><th>Fuente</th><th>Endpoint</th><th>Autenticación</th><th>Respuesta</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>REE · demanda</td>
+            <td><code>/demanda/evolucion</code></td>
+            <td>ninguna</td>
+            <td class="ok">200 · 24 puntos/día</td>
+          </tr>
+          <tr>
+            <td>REE · precio</td>
+            <td><code>/mercados/precios-mercados-tiempo-real</code></td>
+            <td>ninguna</td>
+            <td class="ok">200 · PVPC + spot</td>
+          </tr>
+          <tr>
+            <td>Open-Meteo</td>
+            <td><code>/v1/archive</code></td>
+            <td>ninguna</td>
+            <td class="ok">200 · 24 puntos/día</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="next">
+    <span><span class="brand">Caudal<span class="it">it</span></span> · Fase 1 de 10 · Arquitectura</span>
+    <span>Siguiente: repo, estructura de carpetas y <code style="font-family:'IBM Plex Mono',monospace;font-size:.85rem;color:#65E6D8">.gitignore</code></span>
+  </div>
+
+</div>
+
+</head>
+</html>

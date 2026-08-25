@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Diagrama para LinkedIn</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    width:1200px;height:630px;background:#07161A;color:#E7F1F0;overflow:hidden;
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    padding:46px 54px;display:flex;flex-direction:column;
+  }
+  .top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.18em;
+    text-transform:uppercase;color:#65E6D8;display:flex;align-items:center;gap:11px;
+  }
+  .eyebrow::before{content:"";width:28px;height:2px;background:#2FD6C6;border-radius:2px}
+  .brand{font-family:"Sora",sans-serif;font-weight:700;font-size:19px;letter-spacing:-.02em}
+  .brand .it{color:#65E6D8}
+  h1{
+    font-family:"Sora",sans-serif;font-weight:800;font-size:44px;letter-spacing:-.035em;
+    line-height:1.05;margin:16px 0 6px;
+  }
+  h1 .flow{background:linear-gradient(100deg,#2FD6C6,#43C0F0);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:#8AA5A5;font-size:17px;margin-bottom:14px}
+  .figbox{
+    flex:1;background:#0D2025;border:1px solid #1C363C;border-radius:16px;
+    padding:16px 18px;display:flex;align-items:center;
+  }
+  svg{width:100%;height:auto;display:block}
+</style>
+</head>
+<body>
+  <div class="top">
+    <span class="eyebrow">Fase 1 de 10 · Arquitectura</span>
+    <span class="brand">Caudal<span class="it">it</span></span>
+  </div>
+
+  <h1>¿Cuánto sube la luz por cada <span class="flow">grado</span>?</h1>
+  <p class="sub">Pipeline de datos en AWS, construido en abierto · demanda eléctrica × temperatura, hora a hora</p>
+
+  <div class="figbox">
+    <svg viewBox="0 0 1000 340" role="img" aria-label="Diagrama del pipeline de datos en AWS">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,1 L9,5 L0,9 z" fill="#2FD6C6"/>
+        </marker>
+        <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#2FD6C6"/><stop offset="1" stop-color="#43C0F0"/>
+        </linearGradient>
+      </defs>
+
+      <rect x="188" y="40" width="792" height="38" rx="10" fill="none" stroke="#294950" stroke-dasharray="6 5"/>
+      <text x="584" y="64" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#8AA5A5">Step Functions · orquesta, reintenta, alerta</text>
+      <line x1="248" y1="78" x2="248" y2="104" stroke="#294950" stroke-dasharray="3 3"/>
+      <line x1="584" y1="78" x2="584" y2="143" stroke="#294950" stroke-dasharray="3 3"/>
+      <line x1="920" y1="78" x2="920" y2="143" stroke="#294950" stroke-dasharray="3 3"/>
+
+      <rect x="20" y="108" width="120" height="58" rx="10" fill="#12292F" stroke="#2FD6C6"/>
+      <text x="80" y="131" text-anchor="middle" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">REE apidatos</text>
+      <text x="80" y="148" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">demanda · precio</text>
+      <text x="80" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#65E6D8">sin token</text>
+
+      <rect x="20" y="186" width="120" height="58" rx="10" fill="#12292F" stroke="#43C0F0"/>
+      <text x="80" y="209" text-anchor="middle" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">Open-Meteo</text>
+      <text x="80" y="226" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">temperatura</text>
+      <text x="80" y="238" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#65E6D8">sin token</text>
+
+      <rect x="188" y="108" width="120" height="58" rx="10" fill="#0D2025" stroke="#294950"/>
+      <text x="248" y="133" text-anchor="middle" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">Lambda</text>
+      <text x="248" y="150" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">ingesta REE</text>
+
+      <rect x="188" y="186" width="120" height="58" rx="10" fill="#0D2025" stroke="#294950"/>
+      <text x="248" y="211" text-anchor="middle" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">Lambda</text>
+      <text x="248" y="228" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">ingesta clima</text>
+
+      <rect x="356" y="147" width="120" height="58" rx="10" fill="#0D2025" stroke="#294950"/>
+      <text x="416" y="172" text-anchor="middle" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">S3 · raw</text>
+      <text x="416" y="189" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">JSON tal cual</text>
+
+      <rect x="524" y="147" width="120" height="58" rx="10" fill="#0D2025" stroke="url(#grad)" stroke-width="1.6"/>
+      <text x="584" y="168" text-anchor="middle" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">Glue + PySpark</text>
+      <text x="584" y="184" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#65E6D8">join por hora</text>
+      <text x="584" y="196" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">+ calidad</text>
+
+      <rect x="692" y="147" width="120" height="58" rx="10" fill="#0D2025" stroke="#294950"/>
+      <text x="752" y="168" text-anchor="middle" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">S3 · curated</text>
+      <text x="752" y="184" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">parquet</text>
+      <text x="752" y="196" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">/anio/mes/dia</text>
+
+      <rect x="860" y="147" width="120" height="58" rx="10" fill="#0D2025" stroke="#294950"/>
+      <text x="920" y="168" text-anchor="middle" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">Athena</text>
+      <text x="920" y="184" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">Glue Catalog</text>
+      <text x="920" y="196" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">SQL</text>
+
+      <line x1="144" y1="137" x2="180" y2="137" stroke="#2FD6C6" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+      <text x="162" y="129" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">HTTP</text>
+      <line x1="144" y1="215" x2="180" y2="215" stroke="#43C0F0" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+      <text x="162" y="207" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">HTTP</text>
+
+      <polyline points="312,137 332,137 332,176" fill="none" stroke="#2FD6C6" stroke-width="1.6"/>
+      <polyline points="312,215 332,215 332,176" fill="none" stroke="#43C0F0" stroke-width="1.6"/>
+      <line x1="332" y1="176" x2="348" y2="176" stroke="url(#grad)" stroke-width="1.8" marker-end="url(#ar)"/>
+
+      <line x1="480" y1="176" x2="516" y2="176" stroke="#2FD6C6" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+      <text x="498" y="168" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">crudo</text>
+      <line x1="648" y1="176" x2="684" y2="176" stroke="#2FD6C6" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+      <text x="666" y="168" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">limpio</text>
+      <line x1="816" y1="176" x2="852" y2="176" stroke="#2FD6C6" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+      <text x="834" y="168" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">consulta</text>
+
+      <line x1="248" y1="248" x2="248" y2="272" stroke="#294950" stroke-dasharray="3 3"/>
+      <line x1="584" y1="209" x2="584" y2="272" stroke="#294950" stroke-dasharray="3 3"/>
+      <line x1="920" y1="209" x2="920" y2="272" stroke="#294950" stroke-dasharray="3 3"/>
+      <rect x="20" y="272" width="960" height="40" rx="10" fill="#12292F" stroke="#294950"/>
+      <text x="500" y="297" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#8AA5A5">Terraform · todo como código   —   GitHub Actions · CI/CD   —   CloudWatch · observabilidad</text>
+    </svg>
+  </div>
+</body>
+</html>
