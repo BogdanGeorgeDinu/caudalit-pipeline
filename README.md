@@ -1,3 +1,5 @@
+<p align="right"><a href="README.en.md">🇬🇧 English</a></p>
+
 <h1 align="center">Grados y Megavatios</h1>
 
 <p align="center">
@@ -84,6 +86,8 @@ Se descartó **ESIOS** deliberadamente: ofrece los mismos datos pero exige un to
 | 10 | Teardown | ⬜ |
 
 Cada fase cerrada deja su carpeta en [`docs/`](docs/) con el diagrama, el PDF y las decisiones razonadas.
+
+Estado en vivo: **[caudalit.com/proyecto](https://caudalit.com/proyecto/)**
 
 ## Estructura
 
