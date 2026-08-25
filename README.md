@@ -12,7 +12,7 @@
   <img alt="AWS" src="https://img.shields.io/badge/Cloud-AWS-232F3E?style=flat-square&logo=amazonwebservices&logoColor=white">
   <img alt="PySpark" src="https://img.shields.io/badge/Proceso-PySpark-E25A1C?style=flat-square&logo=apachespark&logoColor=white">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white">
-  <img alt="Fase" src="https://img.shields.io/badge/fase-2%20de%2010-2FD6C6?style=flat-square">
+  <img alt="Fase" src="https://img.shields.io/badge/fase-3%20de%2010-2FD6C6?style=flat-square">
 </p>
 
 ---
@@ -76,7 +76,7 @@ Se descartó **ESIOS** deliberadamente: ofrece los mismos datos pero exige un to
 | 0 | Caso y dataset | Cerrada |
 | 1 | [Arquitectura](docs/fase-1-arquitectura/) | Cerrada |
 | 2 | [Repositorio y estructura](docs/fase-2-repositorio/) | Cerrada |
-| 3 | Terraform: backend, S3, IAM, Glue DB, Athena | Pendiente |
+| 3 | [Terraform: backend, S3, IAM, Glue DB, Athena](docs/fase-3-terraform/) | Cerrada |
 | 4 | Ingesta: Lambdas con reintentos | Pendiente |
 | 5 | Transformación: Glue + PySpark | Pendiente |
 | 6 | Consulta: Athena | Pendiente |

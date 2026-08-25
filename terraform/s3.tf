@@ -1,29 +1,18 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# LOS TRES BUCKETS DEL PIPELINE
-#
-#   raw      · el JSON tal cual lo devuelve la API, sin tocar
-#   curated  · parquet particionado, listo para consultar
-#   athena   · resultados de las consultas (Athena los exige)
-#
-# Todos comparten la misma configuración de seguridad, así que se define una
-# vez con for_each en lugar de repetirla tres veces.
-# ─────────────────────────────────────────────────────────────────────────────
-
 locals {
   buckets = {
     raw = {
       nombre     = "${local.prefijo}-raw-${local.sufijo}"
-      versionado = true # el dato crudo es el seguro ante un fallo de lógica
-      proposito  = "Dato crudo de las APIs, sin transformar"
+      versionado = true
+      proposito  = "Dato crudo de las APIs sin transformar"
     }
     curated = {
       nombre     = "${local.prefijo}-curated-${local.sufijo}"
-      versionado = false # se regenera desde raw; versionar solo ocuparía sitio
-      proposito  = "Parquet particionado por fecha, listo para Athena"
+      versionado = false
+      proposito  = "Parquet particionado por fecha listo para Athena"
     }
     athena = {
       nombre     = "${local.prefijo}-athena-results-${local.sufijo}"
-      versionado = false # resultados desechables
+      versionado = false
       proposito  = "Resultados de las consultas de Athena"
     }
   }
@@ -34,15 +23,14 @@ resource "aws_s3_bucket" "datos" {
 
   bucket = each.value.nombre
 
+  # Sin comas: S3 rechaza con InvalidTag valores de etiqueta que las lleven,
+  # aunque el resto de servicios las admiten.
   tags = {
     Capa      = each.key
     Proposito = each.value.proposito
   }
 }
 
-# Solo se crea el recurso en los buckets que sí lo necesitan. Poner
-# status = "Disabled" explícitamente solo es válido si el bucket nunca tuvo
-# versionado, así que es preferible no declarar el recurso en absoluto.
 resource "aws_s3_bucket_versioning" "datos" {
   for_each = { for k, v in local.buckets : k => v if v.versionado }
 
@@ -53,7 +41,6 @@ resource "aws_s3_bucket_versioning" "datos" {
   }
 }
 
-# SSE-S3 en lugar de KMS: aquí basta y no cobra por petición.
 resource "aws_s3_bucket_server_side_encryption_configuration" "datos" {
   for_each = local.buckets
 
@@ -78,7 +65,6 @@ resource "aws_s3_bucket_public_access_block" "datos" {
   restrict_public_buckets = true
 }
 
-# Deniega cualquier acceso que no viaje por TLS.
 resource "aws_s3_bucket_policy" "solo_tls" {
   for_each = local.buckets
 
@@ -104,8 +90,6 @@ resource "aws_s3_bucket_policy" "solo_tls" {
   depends_on = [aws_s3_bucket_public_access_block.datos]
 }
 
-# Ciclo de vida: limpia subidas incompletas en los tres, y además caduca
-# los resultados de Athena, que si no se acumulan sin control.
 resource "aws_s3_bucket_lifecycle_configuration" "datos" {
   for_each = local.buckets
 

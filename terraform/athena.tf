@@ -1,28 +1,13 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# WORKGROUP DE ATHENA
-#
-# Athena factura por terabyte escaneado. El riesgo real no es el uso normal
-# —aquí los datos son kilobytes— sino una consulta mal escrita sobre una tabla
-# sin particionar, o un SELECT * sobre un histórico entero.
-#
-# El workgroup es donde se pone el freno: límite de bytes por consulta,
-# ubicación de resultados forzada y cifrado obligatorio.
-# ─────────────────────────────────────────────────────────────────────────────
-
 resource "aws_athena_workgroup" "pipeline" {
   name        = "${local.prefijo}-workgroup"
-  description = "Consultas del pipeline, con límite de escaneo por consulta"
+  description = "Consultas del pipeline con límite de escaneo por consulta"
   state       = "ENABLED"
 
   configuration {
-    # Impide que alguien apunte los resultados a otro sitio y se salte
-    # el cifrado o el ciclo de vida.
-    enforce_workgroup_configuration = true
-
+    enforce_workgroup_configuration    = true
     publish_cloudwatch_metrics_enabled = true
 
-    # EL FRENO DE MANO: una consulta que supere este límite se aborta
-    # automáticamente antes de facturar más.
+    # Aborta la consulta al superar el limite, antes de seguir facturando.
     bytes_scanned_cutoff_per_query = var.limite_escaneo_athena_bytes
 
     result_configuration {
@@ -34,6 +19,5 @@ resource "aws_athena_workgroup" "pipeline" {
     }
   }
 
-  # Al destruir, borra también las consultas guardadas del workgroup.
   force_destroy = true
 }

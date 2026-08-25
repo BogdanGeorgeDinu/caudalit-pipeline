@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>El presupuesto va primero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+
+<style>
+  :root{
+    --bg:#07161A;--surface:#0D2025;--surface-2:#12292F;
+    --ink:#E7F1F0;--muted:#8AA5A5;--line:#1C363C;--line-strong:#294950;
+    --accent:#2FD6C6;--accent-2:#43C0F0;--accent-ink:#65E6D8;
+    --warn:#E8B84B;--stop:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1060px;margin:0 auto;padding:56px 24px 80px}
+
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent-ink);margin:0 0 18px;
+    display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--accent);border-radius:2px}
+  h1{font-family:"Sora",sans-serif;font-weight:800;letter-spacing:-.035em;
+    font-size:clamp(2.1rem,5.5vw,3.4rem);line-height:1.02;margin:0;
+    text-wrap:balance;max-width:19ch}
+  h1 .flow{background:linear-gradient(100deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--muted);font-size:1.14rem;margin:24px 0 0;max-width:64ch}
+
+  h2{font-family:"Sora",sans-serif;font-weight:700;letter-spacing:-.025em;
+    font-size:1.7rem;margin:0 0 6px;line-height:1.1}
+  .sec{margin-top:72px}
+  .sec-lead{color:var(--muted);margin:0 0 28px;max-width:66ch}
+
+  figure{margin:0}
+  .figbox{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    padding:22px 20px 14px;box-shadow:var(--shadow);overflow-x:auto}
+  .figbox svg{display:block;width:100%;min-width:820px;height:auto}
+  figcaption{color:var(--muted);font-size:.92rem;margin-top:16px;max-width:72ch}
+
+  .frenos{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+  .freno{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:22px;border-top:3px solid var(--warn)}
+  .freno h3{font-family:"Sora",sans-serif;font-weight:600;font-size:1.02rem;
+    margin:0 0 8px;letter-spacing:-.01em}
+  .freno p{margin:0;color:var(--muted);font-size:.93rem}
+
+  .decisions{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+  .dec{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:22px;display:flex;gap:15px}
+  .dec .mark{width:34px;height:34px;border-radius:9px;flex-shrink:0;
+    background:linear-gradient(135deg,rgba(47,214,198,.18),rgba(67,192,240,.14));
+    display:flex;align-items:center;justify-content:center;color:var(--accent-ink);
+    font-family:"IBM Plex Mono",monospace;font-size:13px}
+  .dec h3{font-family:"Sora",sans-serif;font-weight:600;font-size:1.02rem;
+    margin:4px 0 7px;letter-spacing:-.01em}
+  .dec p{margin:0;color:var(--muted);font-size:.93rem}
+
+  .fallo{margin-top:28px;background:var(--surface-2);border:1px solid var(--line-strong);
+    border-left:3px solid var(--stop);border-radius:0 14px 14px 0;padding:24px 26px}
+  .fallo h3{font-family:"Sora",sans-serif;font-weight:600;font-size:1.06rem;
+    margin:0 0 12px;display:flex;align-items:center;gap:9px}
+  .fallo h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--stop);flex-shrink:0}
+  .fallo p{margin:0 0 12px;color:var(--muted);font-size:.95rem;max-width:76ch}
+  .fallo p:last-child{margin-bottom:0}
+  .fallo b{color:var(--ink);font-weight:600}
+  .fallo code{font-family:"IBM Plex Mono",monospace;font-size:.86rem;
+    color:var(--stop);background:rgba(232,119,107,.1);padding:2px 7px;border-radius:5px}
+
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;margin-top:24px;font-size:.93rem}
+  caption{text-align:left;color:var(--muted);font-size:.9rem;margin-bottom:12px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);font-weight:500}
+  td.n{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink);
+    font-variant-numeric:tabular-nums;text-align:right}
+  td:last-child{color:var(--muted)}
+  code.chip{font-family:"IBM Plex Mono",monospace;font-size:.85rem;color:var(--accent-ink);
+    background:var(--surface-2);padding:2px 7px;border-radius:5px}
+
+  .next{margin-top:72px;padding-top:28px;border-top:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;justify-content:space-between;
+    color:var(--muted);font-size:.9rem}
+  .next .brand{font-family:"Sora",sans-serif;font-weight:700;color:var(--ink)}
+  .next .it{color:var(--accent-ink)}
+
+  @media (max-width:860px){.frenos,.decisions{grid-template-columns:1fr}}
+  @media (max-width:560px){.wrap{padding:40px 18px 60px}}
+
+  @media print{
+    @page{size:A4;margin:0}
+    html,body{background:var(--bg)}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{font-size:13.5px}
+    .wrap{max-width:none;padding:16mm 14mm}
+    .sec{margin-top:34px}
+    h1{font-size:2.35rem}
+    h2{font-size:1.5rem}
+    .figbox{overflow:visible;padding:16px 14px}
+    .figbox svg{min-width:0}
+    .frenos{grid-template-columns:repeat(3,1fr);gap:12px}
+    .decisions{grid-template-columns:repeat(2,1fr);gap:12px}
+    .freno,.dec,.fallo,figure,.tablewrap,table,tr,.next{break-inside:avoid}
+    .tablewrap{overflow:visible}
+    .next{margin-top:34px}
+  }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Fase 3 · Infraestructura</p>
+  <h1>Lo primero no fue un bucket. Fue la <span class="flow">alerta de gasto.</span></h1>
+  <p class="lead">
+    Terraform levantó dieciocho recursos. Ninguno factura por hora, así que la cuenta puede
+    quedarse encendida indefinidamente y seguir costando cero. Pero el orden en que se crean
+    importa más que la lista.
+  </p>
+
+  <section class="sec">
+    <h2>Dos módulos, y el huevo y la gallina</h2>
+    <p class="sec-lead">
+      El módulo que crea el bucket donde vivirá el estado no puede guardar su propio estado
+      dentro de él. Esa restricción define toda la estructura.
+    </p>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 1000 380" role="img"
+             aria-label="El módulo bootstrap, con estado local, crea el presupuesto y el bucket de estado remoto. El módulo principal guarda su estado en ese bucket mediante backend.hcl y crea los tres buckets de datos, los dos roles IAM, el catálogo de Glue y el workgroup de Athena.">
+          <defs>
+            <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="#2FD6C6"/>
+            </marker>
+          </defs>
+
+          <rect x="20" y="30" width="440" height="50" rx="11" fill="#12292F" stroke="#294950"/>
+          <text x="40" y="52" font-family="IBM Plex Mono, monospace" font-size="13" fill="#E7F1F0">terraform/bootstrap/</text>
+          <text x="40" y="70" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#E8B84B">estado local · no se destruye</text>
+
+          <line x1="240" y1="84" x2="240" y2="118" stroke="#294950" stroke-dasharray="3 3"/>
+
+          <rect x="20" y="122" width="210" height="76" rx="10" fill="#0D2025" stroke="#E8B84B"/>
+          <text x="36" y="146" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Presupuesto</text>
+          <text x="36" y="166" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">5 USD/mes · 3 avisos</text>
+          <text x="36" y="182" font-family="IBM Plex Mono, monospace" font-size="10" fill="#E8B84B">se crea antes que nada</text>
+
+          <rect x="250" y="122" width="210" height="76" rx="10" fill="#0D2025" stroke="#2FD6C6"/>
+          <text x="266" y="146" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Bucket de estado</text>
+          <text x="266" y="166" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">versionado · cifrado</text>
+          <text x="266" y="182" font-family="IBM Plex Mono, monospace" font-size="10" fill="#65E6D8">prevent_destroy</text>
+
+          <polyline points="464,160 502,160 502,55 536,55" fill="none" stroke="#2FD6C6" stroke-width="1.8" marker-end="url(#a)"/>
+          <text x="503" y="112" font-family="IBM Plex Mono, monospace" font-size="10" fill="#65E6D8">backend.hcl</text>
+
+          <rect x="540" y="30" width="440" height="50" rx="11" fill="#12292F" stroke="#294950"/>
+          <text x="560" y="52" font-family="IBM Plex Mono, monospace" font-size="13" fill="#E7F1F0">terraform/</text>
+          <text x="560" y="70" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#65E6D8">estado remoto · bloqueo nativo S3</text>
+
+          <line x1="760" y1="84" x2="760" y2="118" stroke="#294950" stroke-dasharray="3 3"/>
+
+          <rect x="540" y="122" width="210" height="66" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="556" y="145" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">S3 · 3 buckets</text>
+          <text x="556" y="164" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">raw · curated · resultados</text>
+          <text x="556" y="179" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">cifrado · sin acceso publico</text>
+
+          <rect x="770" y="122" width="210" height="66" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="786" y="145" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">IAM · 2 roles</text>
+          <text x="786" y="164" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">lambda · glue</text>
+          <text x="786" y="179" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">permisos minimos</text>
+
+          <rect x="540" y="198" width="210" height="66" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="556" y="221" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Glue · catálogo</text>
+          <text x="556" y="240" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">solo metadatos</text>
+          <text x="556" y="255" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8B84B">sin crawler</text>
+
+          <rect x="770" y="198" width="210" height="66" rx="10" fill="#0D2025" stroke="#E8B84B"/>
+          <text x="786" y="221" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Athena · workgroup</text>
+          <text x="786" y="240" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">resultados cifrados</text>
+          <text x="786" y="255" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8B84B">tope 1 GiB por consulta</text>
+
+          <rect x="20" y="300" width="960" height="46" rx="10" fill="#12292F" stroke="#294950"/>
+          <text x="500" y="321" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#8AA5A5">Ningún recurso factura por hora. Coste real de la cuenta en 30 días: 0,0155 USD</text>
+          <text x="500" y="338" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#E8B84B">en ámbar, los frenos de coste</text>
+        </svg>
+      </div>
+      <figcaption>
+        El bucket de estado lleva <code class="chip">prevent_destroy</code>: es el único recurso que
+        sobrevive al <code class="chip">terraform destroy</code> final. Sin el estado, todo lo demás
+        queda huérfano y deja de poder gestionarse con Terraform.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="sec">
+    <h2>Los tres frenos de coste</h2>
+    <p class="sec-lead">
+      No son optimizaciones. Son topes que impiden que un descuido se convierta en una factura.
+    </p>
+
+    <div class="frenos">
+      <div class="freno">
+        <h3>Presupuesto antes que infraestructura</h3>
+        <p>5 USD al mes con aviso al 50%, al 100% y al 100% <strong>previsto</strong>. Este último proyecta el ritmo de gasto y avisa antes de llegar, que es cuando todavía hay margen de reacción.</p>
+      </div>
+      <div class="freno">
+        <h3>Tope de escaneo en Athena</h3>
+        <p>Athena factura por terabyte leído. Una consulta mal escrita sobre una tabla sin particionar puede costar dinero de verdad. El workgroup aborta la que supere 1 GiB.</p>
+      </div>
+      <div class="freno">
+        <h3>Sin crawler de Glue</h3>
+        <p>Un crawler en <em>schedule</em> factura DPU cada vez que corre, haya novedades o no. Es la forma más común de gastar en Glue sin enterarse. La tabla la registrará el propio job de PySpark.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Las decisiones de esta fase</h2>
+
+    <div class="decisions">
+      <div class="dec">
+        <div class="mark">01</div>
+        <div>
+          <h3>Bloqueo de estado sin DynamoDB</h3>
+          <p>Terraform 1.10 introdujo <code class="chip">use_lockfile</code> para el backend de S3. Antes hacía falta una tabla de DynamoDB dedicada solo a eso. Un recurso menos que crear, documentar y pagar.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">02</div>
+        <div>
+          <h3>Ni un ID de cuenta escrito a mano</h3>
+          <p>El repositorio es público. El bucket de estado usa un sufijo aleatorio; el resto obtiene el ID con <code class="chip">data.aws_caller_identity</code> en tiempo de ejecución.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">03</div>
+        <div>
+          <h3>IAM sin políticas gestionadas</h3>
+          <p>Ni un <code class="chip">AmazonS3FullAccess</code>. La Lambda solo puede escribir en <code class="chip">raw</code> —no leer, no borrar— y el job de Glue opera únicamente sobre su base de datos del catálogo.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">04</div>
+        <div>
+          <h3>Los logs se declaran, no se heredan</h3>
+          <p>Si Lambda crea su grupo de logs solo, nace <strong>sin retención</strong>: se guarda para siempre y se paga para siempre. Declarado en Terraform, caduca a los 14 días.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Lo que falló</h2>
+
+    <div class="fallo">
+      <h3><span class="dot"></span>Una coma tumbó el despliegue</h3>
+      <p><code>InvalidTag: The TagValue you have provided is invalid</code></p>
+      <p>Falló en <b>raw</b> y <b>curated</b>, pero no en el bucket de resultados. La diferencia estaba en el valor de una etiqueta: los dos primeros llevaban una coma.</p>
+      <p>Los valores de etiqueta de un bucket S3 aceptan un juego de caracteres más restringido que el del resto de servicios de AWS. <b>La misma etiqueta funciona en un rol IAM y revienta en S3.</b> Y el mensaje de error no dice cuál es el carácter problemático, ni siquiera qué etiqueta lo contiene.</p>
+      <p>El <em>apply</em> quedó a medias. Al corregir y volver a planificar, Terraform pasó de 23 recursos a 18: ya tenía registrado lo creado. Es exactamente para lo que sirve el estado, y se agradece verlo funcionar cuando algo se rompe.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Qué cuesta cada cosa</h2>
+
+    <div class="tablewrap">
+      <table>
+        <caption>Verificado con la CLI sobre los recursos reales, no sobre el estado local.</caption>
+        <thead>
+          <tr><th>Recurso</th><th style="text-align:right">Nº</th><th>Coste mensual</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Buckets S3 (vacíos)</td><td class="n">4</td><td>~0,00 $ · 0,023 $/GB cuando tengan datos</td></tr>
+          <tr><td>Roles IAM con políticas inline</td><td class="n">2</td><td>0,00 $ · IAM siempre es gratis</td></tr>
+          <tr><td>Base de datos del catálogo</td><td class="n">1</td><td>0,00 $ · gratis hasta 1M de objetos</td></tr>
+          <tr><td>Workgroup de Athena</td><td class="n">1</td><td>0,00 $ · se paga por consulta</td></tr>
+          <tr><td>Grupo de logs</td><td class="n">1</td><td>~0,00 $ · 0,50 $/GB al escribir</td></tr>
+          <tr><td>Presupuesto</td><td class="n">1</td><td>0,00 $ · los dos primeros son gratis</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="next">
+    <span><span class="brand">Caudal<span class="it">it</span></span> · Fase 3 de 10 · Infraestructura</span>
+    <span>Siguiente: ingesta con Lambda, reintentos contra una API que falla sola</span>
+  </div>
+
+</div>
+
+</head>
+</html>

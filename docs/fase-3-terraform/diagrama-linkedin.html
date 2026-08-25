@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Fase 3</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1200px;height:630px;background:#07161A;color:#E7F1F0;overflow:hidden;
+  font-family:"IBM Plex Sans",system-ui,sans-serif;padding:44px 54px;display:flex;flex-direction:column}
+.top{display:flex;align-items:baseline;justify-content:space-between}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.18em;
+  text-transform:uppercase;color:#65E6D8;display:flex;align-items:center;gap:11px}
+.eyebrow::before{content:"";width:28px;height:2px;background:#2FD6C6;border-radius:2px}
+.brand{font-family:"Sora",sans-serif;font-weight:700;font-size:19px;letter-spacing:-.02em}
+.brand .it{color:#65E6D8}
+h1{font-family:"Sora",sans-serif;font-weight:800;font-size:41px;letter-spacing:-.035em;
+  line-height:1.05;margin:14px 0 6px}
+h1 .flow{background:linear-gradient(100deg,#2FD6C6,#43C0F0);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:#8AA5A5;font-size:16.5px;margin-bottom:10px}
+.figbox{flex:1;background:#0D2025;border:1px solid #1C363C;border-radius:16px;
+  padding:10px 18px;display:flex;align-items:center}
+svg{width:100%;height:auto;display:block}
+</style></head><body>
+<div class="top">
+  <span class="eyebrow">Fase 3 de 10 &middot; Infraestructura</span>
+  <span class="brand">Caudal<span class="it">it</span></span>
+</div>
+<h1>Lo primero no fue un bucket. Fue la <span class="flow">alerta de gasto.</span></h1>
+<p class="sub">18 recursos con Terraform &middot; ninguno factura por hora &middot; pipeline de datos en AWS, construido en abierto</p>
+<div class="figbox"><svg viewBox="0 0 1000 360" role="img"
+             aria-label="El módulo bootstrap, con estado local, crea el presupuesto y el bucket de estado remoto. El módulo principal guarda su estado en ese bucket mediante backend.hcl y crea los tres buckets de datos, los dos roles IAM, el catálogo de Glue y el workgroup de Athena.">
+          <defs>
+            <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="#2FD6C6"/>
+            </marker>
+          </defs>
+
+          <rect x="20" y="30" width="440" height="50" rx="11" fill="#12292F" stroke="#294950"/>
+          <text x="40" y="52" font-family="IBM Plex Mono, monospace" font-size="13" fill="#E7F1F0">terraform/bootstrap/</text>
+          <text x="40" y="70" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#E8B84B">estado local · no se destruye</text>
+
+          <line x1="240" y1="84" x2="240" y2="118" stroke="#294950" stroke-dasharray="3 3"/>
+
+          <rect x="20" y="122" width="210" height="76" rx="10" fill="#0D2025" stroke="#E8B84B"/>
+          <text x="36" y="146" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Presupuesto</text>
+          <text x="36" y="166" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">5 USD/mes · 3 avisos</text>
+          <text x="36" y="182" font-family="IBM Plex Mono, monospace" font-size="10" fill="#E8B84B">se crea antes que nada</text>
+
+          <rect x="250" y="122" width="210" height="76" rx="10" fill="#0D2025" stroke="#2FD6C6"/>
+          <text x="266" y="146" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Bucket de estado</text>
+          <text x="266" y="166" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">versionado · cifrado</text>
+          <text x="266" y="182" font-family="IBM Plex Mono, monospace" font-size="10" fill="#65E6D8">prevent_destroy</text>
+
+          <polyline points="464,160 502,160 502,55 536,55" fill="none" stroke="#2FD6C6" stroke-width="1.8" marker-end="url(#a)"/>
+          <text x="503" y="112" font-family="IBM Plex Mono, monospace" font-size="10" fill="#65E6D8">backend.hcl</text>
+
+          <rect x="540" y="30" width="440" height="50" rx="11" fill="#12292F" stroke="#294950"/>
+          <text x="560" y="52" font-family="IBM Plex Mono, monospace" font-size="13" fill="#E7F1F0">terraform/</text>
+          <text x="560" y="70" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#65E6D8">estado remoto · bloqueo nativo S3</text>
+
+          <line x1="760" y1="84" x2="760" y2="118" stroke="#294950" stroke-dasharray="3 3"/>
+
+          <rect x="540" y="122" width="210" height="66" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="556" y="145" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">S3 · 3 buckets</text>
+          <text x="556" y="164" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">raw · curated · resultados</text>
+          <text x="556" y="179" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">cifrado · sin acceso publico</text>
+
+          <rect x="770" y="122" width="210" height="66" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="786" y="145" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">IAM · 2 roles</text>
+          <text x="786" y="164" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">lambda · glue</text>
+          <text x="786" y="179" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">permisos minimos</text>
+
+          <rect x="540" y="198" width="210" height="66" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="556" y="221" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Glue · catálogo</text>
+          <text x="556" y="240" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">solo metadatos</text>
+          <text x="556" y="255" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8B84B">sin crawler</text>
+
+          <rect x="770" y="198" width="210" height="66" rx="10" fill="#0D2025" stroke="#E8B84B"/>
+          <text x="786" y="221" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Athena · workgroup</text>
+          <text x="786" y="240" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">resultados cifrados</text>
+          <text x="786" y="255" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8B84B">tope 1 GiB por consulta</text>
+
+          <rect x="20" y="300" width="960" height="46" rx="10" fill="#12292F" stroke="#294950"/>
+          <text x="500" y="321" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#8AA5A5">Ningún recurso factura por hora. Coste real de la cuenta en 30 días: 0,0155 USD</text>
+          <text x="500" y="338" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#E8B84B">en ámbar, los frenos de coste</text>
+        </svg></div>
+</body></html>

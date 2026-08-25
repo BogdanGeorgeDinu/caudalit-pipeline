@@ -1,16 +1,3 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# IAM CON PERMISOS MÍNIMOS
-#
-# Ni una sola política gestionada de AWS con comodines. Cada rol puede hacer
-# exactamente lo que necesita, sobre los recursos concretos que necesita.
-#
-# Es más trabajo que poner AdministratorAccess y seguir, pero es la diferencia
-# entre "funciona" y "funciona y no es un agujero".
-# ─────────────────────────────────────────────────────────────────────────────
-
-# ── Rol de las Lambdas de ingesta ────────────────────────────────────────────
-# Solo escriben en raw/. No pueden leer nada, ni tocar curated.
-
 data "aws_iam_policy_document" "lambda_asumir" {
   statement {
     effect  = "Allow"
@@ -30,7 +17,6 @@ resource "aws_iam_role" "lambda_ingesta" {
 }
 
 data "aws_iam_policy_document" "lambda_ingesta" {
-  # Escribir el dato crudo. Solo PutObject: no necesita leer ni borrar.
   statement {
     sid       = "EscribirEnRaw"
     effect    = "Allow"
@@ -38,7 +24,6 @@ data "aws_iam_policy_document" "lambda_ingesta" {
     resources = ["${aws_s3_bucket.datos["raw"].arn}/*"]
   }
 
-  # Sus propios logs, restringidos a su grupo de logs.
   statement {
     sid    = "EscribirSusLogs"
     effect = "Allow"
@@ -56,15 +41,12 @@ resource "aws_iam_role_policy" "lambda_ingesta" {
   policy = data.aws_iam_policy_document.lambda_ingesta.json
 }
 
-# El grupo de logs se crea aquí y no se deja a la Lambda: así lleva retención
-# definida. Los que crea Lambda sola no caducan nunca, y se pagan para siempre.
+# Declarado aquí para que tenga retención. Los grupos que crea Lambda por su
+# cuenta se guardan indefinidamente.
 resource "aws_cloudwatch_log_group" "lambda_ingesta" {
   name              = "/aws/lambda/${local.prefijo}-ingesta"
   retention_in_days = var.retencion_logs_dias
 }
-
-# ── Rol del job de Glue ──────────────────────────────────────────────────────
-# Lee raw, escribe curated, y registra el esquema en el catálogo.
 
 data "aws_iam_policy_document" "glue_asumir" {
   statement {
@@ -85,7 +67,6 @@ resource "aws_iam_role" "glue_job" {
 }
 
 data "aws_iam_policy_document" "glue_job" {
-  # Leer el crudo. Solo lectura: un job de transformación no borra el origen.
   statement {
     sid       = "LeerRaw"
     effect    = "Allow"
@@ -100,8 +81,7 @@ data "aws_iam_policy_document" "glue_job" {
     resources = [aws_s3_bucket.datos["raw"].arn]
   }
 
-  # Escribir el resultado. DeleteObject es necesario para poder reescribir
-  # una partición al reprocesar un día.
+  # DeleteObject permite reescribir una partición al reprocesar un día.
   statement {
     sid    = "EscribirCurated"
     effect = "Allow"
@@ -120,7 +100,6 @@ data "aws_iam_policy_document" "glue_job" {
     resources = [aws_s3_bucket.datos["curated"].arn]
   }
 
-  # Catálogo: solo sobre nuestra base de datos, no sobre todo el catálogo.
   statement {
     sid    = "GestionarCatalogo"
     effect = "Allow"

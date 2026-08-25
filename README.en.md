@@ -12,7 +12,7 @@
   <img alt="AWS" src="https://img.shields.io/badge/Cloud-AWS-232F3E?style=flat-square&logo=amazonwebservices&logoColor=white">
   <img alt="PySpark" src="https://img.shields.io/badge/Processing-PySpark-E25A1C?style=flat-square&logo=apachespark&logoColor=white">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white">
-  <img alt="Phase" src="https://img.shields.io/badge/phase-2%20of%2010-2FD6C6?style=flat-square">
+  <img alt="Phase" src="https://img.shields.io/badge/phase-3%20of%2010-2FD6C6?style=flat-square">
 </p>
 
 ---
@@ -78,7 +78,7 @@ Both **public and token-free**. Verified before anything was designed.
 | 0 | Use case and dataset | Done |
 | 1 | [Architecture](docs/fase-1-arquitectura/) | Done |
 | 2 | [Repository and structure](docs/fase-2-repositorio/) | Done |
-| 3 | Terraform: backend, S3, IAM, Glue DB, Athena | Pending |
+| 3 | [Terraform: backend, S3, IAM, Glue DB, Athena](docs/fase-3-terraform/) | Done |
 | 4 | Ingestion: Lambdas with retries | Pending |
 | 5 | Transformation: Glue + PySpark | Pending |
 | 6 | Query: Athena | Pending |
