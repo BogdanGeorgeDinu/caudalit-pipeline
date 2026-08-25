@@ -4,17 +4,23 @@
 *.tfstate.*
 *.tfstate.backup
 .terraform/
-.terraform.lock.hcl
 crash.log
 crash.*.log
+
+# .terraform.lock.hcl SÍ se versiona a propósito: fija las versiones exactas
+# de los providers para que cualquier máquina resuelva lo mismo.
 
 # Variables: se versiona solo el ejemplo, nunca los valores reales
 *.tfvars
 *.tfvars.json
-!*.example.tfvars
+!*.tfvars.example
 
-# Planes guardados (pueden incluir valores de recursos)
+# Configuración del backend: lleva el nombre real del bucket de estado
+backend.hcl
+
+# Planes guardados: binarios que pueden incluir valores de recursos
 *.tfplan
+tfplan
 plan.out
 
 # ─── Credenciales y secretos ────────────────────────────────────────────────

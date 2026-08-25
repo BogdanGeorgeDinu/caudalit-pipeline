@@ -1,0 +1,3 @@
+# Copia este archivo a terraform.tfvars y pon tu correo real.
+# terraform.tfvars NO se versiona (está en .gitignore).
+email_alertas = "tu-correo@ejemplo.com"

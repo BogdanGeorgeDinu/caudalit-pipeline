@@ -1,0 +1,10 @@
+# Copia este archivo a backend.hcl con los valores reales que imprime el
+# bootstrap, y ejecuta:
+#
+#   terraform init -backend-config=backend.hcl
+#
+# backend.hcl NO se versiona: contiene el nombre real del bucket de estado.
+
+bucket = "caudalit-esios-tfstate-XXXXXXXX"
+key    = "pipeline/terraform.tfstate"
+region = "eu-west-1"
