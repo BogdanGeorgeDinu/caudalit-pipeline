@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>La frontera del repositorio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+
+<style>
+  :root{
+    --bg:#07161A; --surface:#0D2025; --surface-2:#12292F;
+    --ink:#E7F1F0; --muted:#8AA5A5; --line:#1C363C; --line-strong:#294950;
+    --accent:#2FD6C6; --accent-2:#43C0F0; --accent-ink:#65E6D8; --on-accent:#04231F;
+    --warn:#E8B84B; --stop:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:56px 24px 80px}
+
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent-ink);margin:0 0 18px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--accent);border-radius:2px}
+  h1{
+    font-family:"Sora",sans-serif;font-weight:800;letter-spacing:-.035em;
+    font-size:clamp(2.1rem,5.5vw,3.4rem);line-height:1.02;margin:0;
+    text-wrap:balance;max-width:20ch;
+  }
+  h1 .flow{background:linear-gradient(100deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--muted);font-size:1.15rem;margin:24px 0 0;max-width:64ch}
+
+  h2{font-family:"Sora",sans-serif;font-weight:700;letter-spacing:-.025em;
+    font-size:1.7rem;margin:0 0 6px;line-height:1.1}
+  .sec{margin-top:72px}
+  .sec-lead{color:var(--muted);margin:0 0 28px;max-width:66ch}
+
+  figure{margin:0}
+  .figbox{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    padding:22px 20px 14px;box-shadow:var(--shadow);overflow-x:auto}
+  .figbox svg{display:block;width:100%;min-width:800px;height:auto}
+  figcaption{color:var(--muted);font-size:.92rem;margin-top:16px;max-width:72ch}
+
+  .repos{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+  .repo{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px}
+  .repo .tag{
+    font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;padding:4px 9px;border-radius:6px;display:inline-block;margin-bottom:12px;
+  }
+  .repo.pub .tag{background:rgba(47,214,198,.14);color:var(--accent-ink);border:1px solid var(--line-strong)}
+  .repo.priv .tag{background:rgba(232,184,75,.12);color:var(--warn);border:1px solid var(--line-strong)}
+  .repo h3{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:1.02rem;margin:0 0 10px;color:var(--ink)}
+  .repo p{margin:0;color:var(--muted);font-size:.94rem}
+
+  .decisions{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+  .dec{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;gap:15px}
+  .dec .mark{
+    width:34px;height:34px;border-radius:9px;flex-shrink:0;
+    background:linear-gradient(135deg,rgba(47,214,198,.18),rgba(67,192,240,.14));
+    display:flex;align-items:center;justify-content:center;color:var(--accent-ink);
+    font-family:"IBM Plex Mono",monospace;font-size:13px;
+  }
+  .dec h3{font-family:"Sora",sans-serif;font-weight:600;font-size:1.02rem;margin:4px 0 7px;letter-spacing:-.01em}
+  .dec p{margin:0;color:var(--muted);font-size:.93rem}
+
+  .warn{
+    margin-top:28px;background:var(--surface-2);border:1px solid var(--line-strong);
+    border-left:3px solid var(--stop);border-radius:0 14px 14px 0;padding:24px 26px;
+  }
+  .warn h3{font-family:"Sora",sans-serif;font-weight:600;font-size:1.06rem;margin:0 0 10px;
+    display:flex;align-items:center;gap:9px}
+  .warn h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--stop);flex-shrink:0}
+  .warn p{margin:0 0 10px;color:var(--muted);font-size:.95rem;max-width:76ch}
+  .warn p:last-child{margin-bottom:0}
+  .warn b{color:var(--ink);font-weight:600}
+
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;margin-top:24px;font-size:.93rem}
+  caption{text-align:left;color:var(--muted);font-size:.9rem;margin-bottom:12px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code,.chip{
+    font-family:"IBM Plex Mono",monospace;font-size:.85rem;color:var(--accent-ink);
+    background:var(--surface-2);padding:2px 7px;border-radius:5px;white-space:nowrap;
+  }
+  td:last-child{color:var(--muted)}
+
+  .next{margin-top:72px;padding-top:28px;border-top:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;justify-content:space-between;
+    color:var(--muted);font-size:.9rem}
+  .next .brand{font-family:"Sora",sans-serif;font-weight:700;color:var(--ink)}
+  .next .it{color:var(--accent-ink)}
+
+  @media (max-width:860px){.repos,.decisions{grid-template-columns:1fr}}
+  @media (max-width:560px){.wrap{padding:40px 18px 60px}}
+
+  @media print{
+    @page{size:A4;margin:0}
+    html,body{background:var(--bg)}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{font-size:13.5px}
+    .wrap{max-width:none;padding:16mm 14mm}
+    .sec{margin-top:34px}
+    h1{font-size:2.35rem}
+    h2{font-size:1.5rem}
+    .figbox{overflow:visible;padding:16px 14px}
+    .figbox svg{min-width:0}
+    .repos,.decisions{grid-template-columns:repeat(2,1fr);gap:12px}
+    .repo,.dec,.warn,figure,.tablewrap,table,tr,.next{break-inside:avoid}
+    .tablewrap{overflow:visible}
+    .next{margin-top:34px}
+  }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Fase 2 · Repositorio</p>
+  <h1>El archivo más importante <span class="flow">no tiene código.</span></h1>
+  <p class="lead">
+    La Fase 2 no despliega nada ni procesa un solo dato. Decide algo más difícil de deshacer:
+    qué sale de tu ordenador y qué se queda dentro. En un repositorio público, esa frontera
+    solo se cruza en un sentido.
+  </p>
+
+  <section class="sec">
+    <h2>La frontera</h2>
+    <p class="sec-lead">Todo lo del proyecto vive en la misma carpeta. El <code class="chip">.gitignore</code> es lo único que decide qué parte de ella se hace pública.</p>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 1000 380" role="img"
+             aria-label="Diagrama: desde la carpeta local, el código, la documentación y los diagramas atraviesan el filtro .gitignore y llegan a los repositorios de GitHub; el estado de Terraform, las variables, las credenciales y los borradores de LinkedIn quedan bloqueados por el filtro y permanecen solo en el ordenador.">
+          <defs>
+            <marker id="ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="#2FD6C6"/>
+            </marker>
+            <marker id="no" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="#E8776B"/>
+            </marker>
+          </defs>
+
+          <!-- ORIGEN: lo que sí pasa -->
+          <rect x="20" y="60" width="270" height="110" rx="11" fill="#0D2025" stroke="#294950"/>
+          <text x="36" y="84" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Código y documentación</text>
+          <text x="36" y="106" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">README.md · decisiones.md</text>
+          <text x="36" y="124" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">terraform/*.tf · src/*.py</text>
+          <text x="36" y="142" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">diagramas · PDF de cada fase</text>
+          <text x="36" y="160" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">*.example.tfvars</text>
+
+          <!-- ORIGEN: lo que no pasa -->
+          <rect x="20" y="215" width="270" height="122" rx="11" fill="#0D2025" stroke="#294950"/>
+          <text x="36" y="239" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Estado, secretos y borradores</text>
+          <text x="36" y="261" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">*.tfstate  ← puede llevar secretos</text>
+          <text x="36" y="279" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">*.tfvars · .env · *.pem</text>
+          <text x="36" y="297" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">.terraform/ · __pycache__/</text>
+          <text x="36" y="315" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">post-linkedin.txt</text>
+          <text x="36" y="331" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#65E6D8">carpeta local del proyecto</text>
+
+          <!-- FILTRO -->
+          <rect x="382" y="60" width="150" height="277" rx="12" fill="#12292F" stroke="#2FD6C6" stroke-dasharray="7 5"/>
+          <text x="457" y="188" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#65E6D8">.gitignore</text>
+          <text x="457" y="208" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">la frontera</text>
+
+          <line x1="294" y1="115" x2="374" y2="115" stroke="#2FD6C6" stroke-width="1.6" marker-end="url(#ok)"/>
+          <line x1="294" y1="276" x2="374" y2="276" stroke="#8AA5A5" stroke-width="1.6" marker-end="url(#ok)"/>
+
+          <!-- SALIDA: GitHub -->
+          <line x1="536" y1="115" x2="616" y2="115" stroke="#2FD6C6" stroke-width="1.8" marker-end="url(#ok)"/>
+          <text x="576" y="107" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">pasa</text>
+
+          <rect x="624" y="60" width="356" height="52" rx="10" fill="#0D2025" stroke="#2FD6C6"/>
+          <text x="642" y="82" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">caudalit-pipeline</text>
+          <text x="642" y="99" font-family="IBM Plex Mono, monospace" font-size="10" fill="#65E6D8">público · portfolio permanente</text>
+
+          <rect x="624" y="124" width="356" height="52" rx="10" fill="#0D2025" stroke="#294950"/>
+          <text x="642" y="146" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">caudalit-web</text>
+          <text x="642" y="163" font-family="IBM Plex Mono, monospace" font-size="10" fill="#E8B84B">privado · despliega en Netlify</text>
+
+          <!-- SALIDA: bloqueado -->
+          <line x1="536" y1="276" x2="616" y2="276" stroke="#E8776B" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#no)"/>
+          <text x="576" y="268" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8776B">bloqueado</text>
+
+          <rect x="624" y="238" width="356" height="76" rx="10" fill="#12292F" stroke="#E8776B"/>
+          <text x="642" y="262" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Nunca sale de tu Mac</text>
+          <text x="642" y="283" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">lo que se sube a un repo público</text>
+          <text x="642" y="299" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">queda en el historial para siempre</text>
+        </svg>
+      </div>
+      <figcaption>
+        El <code class="chip">.gitignore</code> se escribe <strong>antes</strong> del primer commit, no después.
+        Un archivo que ya entró en el historial sigue ahí aunque lo borres en un commit posterior:
+        para sacarlo hay que reescribir la historia entera del repositorio.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="sec">
+    <h2>Dos repositorios, no uno</h2>
+    <p class="sec-lead">Cambian a ritmos distintos y se despliegan distinto. Juntarlos habría significado que cada corrección de una coma en la web ensuciara el historial del proyecto técnico.</p>
+
+    <div class="repos">
+      <div class="repo pub">
+        <span class="tag">Público</span>
+        <h3>caudalit-pipeline</h3>
+        <p>El proyecto de datos y su documentación. Es la pieza de portfolio: cuando al final se ejecute <code class="chip">terraform destroy</code> y la infraestructura desaparezca, esto es lo que queda como prueba del trabajo.</p>
+      </div>
+      <div class="repo priv">
+        <span class="tag">Privado</span>
+        <h3>caudalit-web</h3>
+        <p>La landing de caudalit.com. Privado porque el código fuente de un sitio comercial no aporta nada al portfolio. Conectado a Netlify: cada <code class="chip">push</code> a <code class="chip">main</code> despliega solo.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Qué se excluye, y por qué</h2>
+    <p class="sec-lead">Cada regla del <code class="chip">.gitignore</code> responde a un riesgo concreto, no a una costumbre heredada.</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Regla</th><th>Motivo</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>*.tfstate</code></td><td>Terraform guarda ahí el estado real de la infraestructura, y puede incluir valores sensibles <strong>en texto plano</strong>. Es la filtración más habitual en repos de IaC.</td></tr>
+          <tr><td><code>*.tfvars</code></td><td>Los valores reales de las variables: IDs de cuenta, ARNs, nombres de bucket. Se versiona solo <code>*.example.tfvars</code> con valores de mentira.</td></tr>
+          <tr><td><code>.terraform/</code></td><td>Providers descargados. Cientos de megas que se regeneran con <code>terraform init</code>.</td></tr>
+          <tr><td><code>.env</code> · <code>*.pem</code> · <code>*.key</code></td><td>Credenciales y claves privadas. Nunca, bajo ningún concepto.</td></tr>
+          <tr><td><code>post-linkedin.txt</code></td><td>Los borradores de las publicaciones. No son parte del proyecto técnico, y en un repo de portfolio desdibujan lo que se está enseñando.</td></tr>
+          <tr><td><code>__pycache__/</code> · <code>*.zip</code></td><td>Artefactos de compilación y empaquetado de las Lambdas. Se regeneran.</td></tr>
+          <tr><td><code>.DS_Store</code></td><td>Metadatos de Finder. Ruido puro, y delata la estructura de carpetas de tu máquina.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Las decisiones de esta fase</h2>
+
+    <div class="decisions">
+      <div class="dec">
+        <div class="mark">01</div>
+        <div>
+          <h3>Correo privado en los commits</h3>
+          <p>GitHub ofrece una dirección <code class="chip">@users.noreply</code>. Sin ella, tu correo real queda escrito en cada commit de un repositorio público, y hay bots rastreando GitHub precisamente para eso. Quitarlo después obliga a reescribir todo el historial.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">02</div>
+        <div>
+          <h3>Un commit por fase</h3>
+          <p>El historial cuenta la misma historia que las publicaciones. Quien abra el repositorio dentro de un año puede leer cómo evolucionó la decisión, no solo dónde acabó.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">03</div>
+        <div>
+          <h3>El README es la portada</h3>
+          <p>Abre con el diagrama y la pregunta de negocio, no con la lista de tecnologías. Quien entra decide en cinco segundos si sigue leyendo, y «¿cuánto sube la luz por cada grado?» retiene más que «Terraform, Glue, PySpark».</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">04</div>
+        <div>
+          <h3>Estructura completa desde el primer commit</h3>
+          <p>Las carpetas vacías no existen en Git. Con un <code class="chip">.gitkeep</code> el repositorio ya enseña hacia dónde va —<code class="chip">terraform/</code>, <code class="chip">src/</code>, <code class="chip">athena/</code>— aunque solo esté hecha la primera fase.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn">
+      <h3><span class="dot"></span>Un repositorio público solo se cruza en un sentido</h3>
+      <p><b>Borrar un archivo no lo borra del historial.</b> Sigue accesible en el commit donde entró, y GitHub y los buscadores pueden haberlo cacheado. Sacarlo de verdad exige reescribir la historia del repositorio y forzar el <code class="chip">push</code>, que rompe cualquier copia que alguien haya clonado.</p>
+      <p>Por eso la revisión va <b>antes</b> del primer <code class="chip">push</code>, no después: se comprueba qué archivos entran, se verifica que no hay estado ni credenciales, y solo entonces se sube.</p>
+    </div>
+  </section>
+
+  <div class="next">
+    <span><span class="brand">Caudal<span class="it">it</span></span> · Fase 2 de 10 · Repositorio</span>
+    <span>Siguiente: Terraform — backend remoto, S3, IAM y presupuesto con alerta</span>
+  </div>
+
+</div>
+
+</head>
+</html>

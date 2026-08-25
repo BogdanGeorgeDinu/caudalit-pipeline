@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Diagrama Fase 2 para LinkedIn</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1200px;height:630px;background:#07161A;color:#E7F1F0;overflow:hidden;
+    font-family:"IBM Plex Sans",system-ui,sans-serif;padding:46px 54px;display:flex;flex-direction:column}
+  .top{display:flex;align-items:baseline;justify-content:space-between}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.18em;
+    text-transform:uppercase;color:#65E6D8;display:flex;align-items:center;gap:11px}
+  .eyebrow::before{content:"";width:28px;height:2px;background:#2FD6C6;border-radius:2px}
+  .brand{font-family:"Sora",sans-serif;font-weight:700;font-size:19px;letter-spacing:-.02em}
+  .brand .it{color:#65E6D8}
+  h1{font-family:"Sora",sans-serif;font-weight:800;font-size:44px;letter-spacing:-.035em;
+    line-height:1.05;margin:16px 0 6px}
+  h1 .flow{background:linear-gradient(100deg,#2FD6C6,#43C0F0);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:#8AA5A5;font-size:17px;margin-bottom:14px}
+  .figbox{flex:1;background:#0D2025;border:1px solid #1C363C;border-radius:16px;
+    padding:14px 18px;display:flex;align-items:center}
+  svg{width:100%;height:auto;display:block}
+</style>
+</head>
+<body>
+  <div class="top">
+    <span class="eyebrow">Fase 2 de 10 · Repositorio</span>
+    <span class="brand">Caudal<span class="it">it</span></span>
+  </div>
+
+  <h1>El archivo más importante <span class="flow">no tiene código.</span></h1>
+  <p class="sub">Un repositorio público solo se cruza en un sentido · pipeline de datos en AWS, construido en abierto</p>
+
+  <div class="figbox">
+    <svg viewBox="0 0 1000 360" role="img" aria-label="El .gitignore como frontera entre la carpeta local y los repositorios públicos">
+      <defs>
+        <marker id="ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,1 L9,5 L0,9 z" fill="#2FD6C6"/>
+        </marker>
+        <marker id="no" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,1 L9,5 L0,9 z" fill="#E8776B"/>
+        </marker>
+      </defs>
+
+      <rect x="20" y="46" width="272" height="108" rx="11" fill="#0D2025" stroke="#294950"/>
+      <text x="36" y="70" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">Código y documentación</text>
+      <text x="36" y="92" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8AA5A5">README.md · decisiones.md</text>
+      <text x="36" y="111" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8AA5A5">terraform/*.tf · src/*.py</text>
+      <text x="36" y="130" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8AA5A5">diagramas · *.example.tfvars</text>
+
+      <rect x="20" y="196" width="272" height="126" rx="11" fill="#0D2025" stroke="#294950"/>
+      <text x="36" y="220" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">Estado, secretos, borradores</text>
+      <text x="36" y="242" font-family="IBM Plex Mono, monospace" font-size="11" fill="#E8776B">*.tfstate</text>
+      <text x="36" y="261" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8AA5A5">*.tfvars · .env · *.pem</text>
+      <text x="36" y="280" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8AA5A5">.terraform/ · __pycache__/</text>
+      <text x="36" y="299" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8AA5A5">post-linkedin.txt</text>
+      <text x="36" y="316" font-family="IBM Plex Mono, monospace" font-size="10" fill="#65E6D8">carpeta local</text>
+
+      <rect x="384" y="46" width="148" height="276" rx="12" fill="#12292F" stroke="#2FD6C6" stroke-dasharray="7 5"/>
+      <text x="458" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#65E6D8">.gitignore</text>
+      <text x="458" y="198" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8AA5A5">la frontera</text>
+
+      <line x1="296" y1="100" x2="376" y2="100" stroke="#2FD6C6" stroke-width="1.8" marker-end="url(#ok)"/>
+      <line x1="296" y1="259" x2="376" y2="259" stroke="#8AA5A5" stroke-width="1.8" marker-end="url(#ok)"/>
+
+      <line x1="536" y1="100" x2="616" y2="100" stroke="#2FD6C6" stroke-width="2" marker-end="url(#ok)"/>
+      <text x="576" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">pasa</text>
+
+      <rect x="624" y="46" width="356" height="52" rx="10" fill="#0D2025" stroke="#2FD6C6"/>
+      <text x="642" y="68" font-family="IBM Plex Mono, monospace" font-size="13" fill="#E7F1F0">caudalit-pipeline</text>
+      <text x="642" y="86" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#65E6D8">público · portfolio permanente</text>
+
+      <rect x="624" y="110" width="356" height="52" rx="10" fill="#0D2025" stroke="#294950"/>
+      <text x="642" y="132" font-family="IBM Plex Mono, monospace" font-size="13" fill="#E7F1F0">caudalit-web</text>
+      <text x="642" y="150" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#E8B84B">privado · despliega en Netlify</text>
+
+      <line x1="536" y1="259" x2="616" y2="259" stroke="#E8776B" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#no)"/>
+      <text x="576" y="251" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#E8776B">bloqueado</text>
+
+      <rect x="624" y="220" width="356" height="78" rx="10" fill="#12292F" stroke="#E8776B"/>
+      <text x="642" y="245" font-family="Sora, sans-serif" font-size="13" font-weight="600" fill="#E7F1F0">Nunca sale de tu Mac</text>
+      <text x="642" y="266" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">lo que entra en un repo público</text>
+      <text x="642" y="283" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">queda en el historial para siempre</text>
+    </svg>
+  </div>
+</body>
+</html>
