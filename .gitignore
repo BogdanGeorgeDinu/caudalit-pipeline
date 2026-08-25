@@ -1,0 +1,52 @@
+# ─── Terraform ──────────────────────────────────────────────────────────────
+# El estado puede contener valores sensibles en claro. El repo es público.
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+
+# Variables: se versiona solo el ejemplo, nunca los valores reales
+*.tfvars
+*.tfvars.json
+!*.example.tfvars
+
+# Planes guardados (pueden incluir valores de recursos)
+*.tfplan
+plan.out
+
+# ─── Credenciales y secretos ────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+credentials
+*.pem
+*.key
+.aws/
+
+# ─── Material de publicación (no es parte del proyecto técnico) ─────────────
+# Los borradores de los posts se quedan en local.
+post-linkedin.txt
+posts-borradores/
+
+# ─── Python ─────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# ─── Empaquetado de Lambdas ─────────────────────────────────────────────────
+build/
+dist/
+*.zip
+
+# ─── Sistema y editores ─────────────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp
