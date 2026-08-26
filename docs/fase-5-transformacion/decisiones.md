@@ -119,27 +119,79 @@ La orquestación de la Fase 7 decidirá qué merece reintento, con criterio y co
 Glue factura por DPU-hora y no tiene capa gratuita. El `timeout` no está para que el
 job quepa, está para que un cuelgue no se convierta en una factura.
 
-## Lo que se probó, y lo que no
+### 11. `collect()` no devuelve la zona horaria que crees
+Encontrado al montar Spark en local para probar el job, y es la segunda trampa
+horaria de la fase.
 
-**Probado.** La lógica de transformación completa contra los ficheros reales que la
-Fase 4 dejó en `raw` (1 de marzo de 2024), con `herramientas/revisar_dia.py`:
-24 filas, cero nulos, cero errores. Y 24 tests unitarios sobre las reglas horarias,
-el aplanado y la calidad, incluidos los dos domingos del cambio de hora y la trampa
-del `utc_offset_seconds`.
+Con `spark.sql.session.timeZone = UTC`, un `.show()` de la marca de REE imprime
+`2024-02-29 23:00:00`, que es correcto. Pero al recoger esa misma fila con
+`collect()`, Python recibe `datetime(2024, 3, 1, 0, 0)`: **sin `tzinfo` y
+convertida a la zona horaria del driver**, no a la de sesión.
 
-La comprobación que más tranquiliza no es un test: es mirar la tabla. La temperatura
-mínima cae a las 07:00-08:00 y la máxima a las 17:00, que es lo que hace la temperatura.
-Si el desfase estuviera mal, la curva saldría corrida y se vería a simple vista.
+El dato dentro de Spark está bien y el parquet se escribe bien. Lo que engaña es
+el viaje de vuelta al driver. Un test que compare el objeto recogido contra UTC
+falla por una hora sin que haya ningún error en la transformación, que es
+exactamente lo que me pasó.
 
-**No probado.** El job de Glue no se ha ejecutado. Sin Java ni PySpark en la máquina de
-desarrollo, la capa de Spark está escrita pero no ejecutada. La primera ejecución real
-tiene que confirmar tres cosas concretas:
+La forma fiable de comprobarlo es formatear la marca **dentro de Spark**
+(`date_format`) y comparar cadenas. Así la conversión del driver no entra en la
+ecuación.
 
-1. Que `to_timestamp` con `yyyy-MM-dd'T'HH:mm:ss.SSSXXX` parsea el desfase de REE.
-2. Que `arrays_zip` sobre `hourly.time` y `hourly.temperature_2m` alinea bien los arrays.
-3. Que la proyección de particiones encuentra lo que el job escribió.
+## Lo que se probó
 
-**Esta fase no está terminada hasta que esa ejecución pase.**
+**La transformación completa, en Spark de verdad.** Se montó Java 17 y PySpark
+3.5.3 en local para no dejar la capa de Spark sin ejecutar. La suite compara,
+fila a fila, lo que produce Spark contra la implementación de referencia en
+Python puro sobre los ficheros reales del 1 de marzo de 2024:
+
+| Comprobación | Resultado |
+|---|---|
+| Las 24 filas de Spark coinciden con la referencia | correcto |
+| `to_timestamp` con `SSSXXX` aplica el desfase de REE | correcto |
+| `arrays_zip` alinea `time` y `temperature_2m` de Open-Meteo | correcto |
+| La medianoche local del 1 de marzo cae en 23:00 UTC | correcto |
+| Día completo: 24 filas, cero nulos, cero errores, cero avisos | correcto |
+| El parquet se escribe en `anio=2024/mes=03/dia=01` | correcto |
+| Al releerlo salen 24 filas con `momento_local` | correcto |
+
+Son 28 tests en total. Los 24 de reglas horarias, aplanado y calidad no
+necesitan Spark y corren en milisegundos; los 4 de Spark se saltan solos si
+PySpark no está instalado, para que la suite no dependa de tener un Spark en la
+máquina.
+
+Además, la comprobación que más tranquiliza no es un test: es mirar la tabla. La
+temperatura mínima cae a las 07:00-08:00 y la máxima a las 17:00, que es lo que
+hace la temperatura. Si el desfase estuviera mal, la curva saldría corrida y se
+vería a simple vista.
+
+## Lo que sigue sin probarse
+El job **no se ha ejecutado en Glue**. Lo verificado es la transformación, que es
+donde estaba el riesgo. Queda por confirmar en la primera ejecución real lo que
+solo existe en el entorno de AWS:
+
+1. Que el envoltorio de `awsglue` arranca y `getResolvedOptions` recibe los
+   parámetros esperados.
+2. Que el rol lee de `raw` y escribe en `curated` con los permisos definidos.
+3. Que Athena encuentra las particiones por proyección.
+
+Esa ejecución cuesta unos cuatro céntimos.
+
+## Cómo se ejecutan las pruebas
+
+```bash
+# Rapido, sin Spark: 24 tests en milisegundos
+python3 -m unittest discover -s tests
+
+# Completo, con Spark local
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PYSPARK_PYTHON=/ruta/al/venv/bin/python
+export PYSPARK_DRIVER_PYTHON=$PYSPARK_PYTHON
+venv/bin/python -m unittest tests.test_transformacion tests.test_spark_local
+```
+
+PySpark necesita Python 3.11 o 3.12 y Java 17. Si el worker y el driver usan
+versiones distintas de Python, Spark falla con `PYTHON_VERSION_MISMATCH`: de ahí
+que haya que fijar `PYSPARK_PYTHON` explícitamente.
 
 ## Observación que queda para más adelante
 Cada `terraform plan` marca las dos Lambdas como modificadas aunque su código no haya

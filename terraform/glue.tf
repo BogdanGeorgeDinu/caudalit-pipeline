@@ -17,7 +17,7 @@ data "archive_file" "glue_modulos" {
   output_path = "${path.module}/.build/glue_modulos.zip"
 
   dynamic "source" {
-    for_each = toset(["tiempo.py", "parseo.py", "calidad.py"])
+    for_each = toset(["tiempo.py", "parseo.py", "calidad.py", "transformacion.py"])
 
     content {
       content  = file("${path.module}/../src/glue/${source.value}")
