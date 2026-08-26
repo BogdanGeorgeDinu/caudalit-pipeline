@@ -1,0 +1,204 @@
+"""Pruebas de la lógica de transformación. Sin Spark: se ejecutan en segundos.
+
+    python3 -m unittest discover -s tests -v
+"""
+
+import pathlib
+import sys
+import unittest
+from datetime import date, datetime, timezone
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src" / "glue"))
+
+import calidad  # noqa: E402
+import parseo  # noqa: E402
+import tiempo  # noqa: E402
+
+
+def utc(*args):
+    return datetime(*args, tzinfo=timezone.utc)
+
+
+class Tiempo(unittest.TestCase):
+    def test_dia_normal_tiene_24_horas(self):
+        self.assertEqual(tiempo.horas_esperadas(date(2024, 3, 1)), 24)
+
+    def test_domingo_que_adelanta_tiene_23(self):
+        self.assertEqual(tiempo.horas_esperadas(date(2024, 3, 31)), 23)
+
+    def test_domingo_que_atrasa_tiene_25(self):
+        self.assertEqual(tiempo.horas_esperadas(date(2024, 10, 27)), 25)
+
+    def test_invierno_va_una_hora_por_delante_de_utc(self):
+        self.assertEqual(tiempo.local_a_utc("2024-03-01T00:00"), utc(2024, 2, 29, 23, 0))
+
+    def test_verano_va_dos_horas_por_delante_de_utc(self):
+        self.assertEqual(tiempo.local_a_utc("2024-07-15T00:00"), utc(2024, 7, 14, 22, 0))
+
+    def test_las_dos_fuentes_convergen_en_el_mismo_instante(self):
+        """El caso que justifica todo el módulo.
+
+        Si se usara el `utc_offset_seconds` de Open-Meteo, que en la respuesta
+        del 1 de marzo vale 7200, esta igualdad fallaría por una hora y el
+        cruce emparejaría cada temperatura con la demanda equivocada.
+        """
+        self.assertEqual(
+            tiempo.local_a_utc("2024-03-01T00:00"),
+            tiempo.desfasada_a_utc("2024-03-01T00:00:00.000+01:00"),
+        )
+
+    def test_rechaza_marca_con_desfase_donde_no_toca(self):
+        with self.assertRaises(ValueError):
+            tiempo.local_a_utc("2024-03-01T00:00:00+01:00")
+
+    def test_rechaza_marca_sin_desfase_donde_hace_falta(self):
+        with self.assertRaises(ValueError):
+            tiempo.desfasada_a_utc("2024-03-01T00:00")
+
+
+class Parseo(unittest.TestCase):
+    def test_demanda_se_aplana_a_filas_horarias(self):
+        payload = {
+            "included": [
+                {
+                    "attributes": {
+                        "title": "Demanda",
+                        "values": [
+                            {"value": 26056.6, "datetime": "2024-03-01T00:00:00.000+01:00"},
+                            {"value": 24570.4, "datetime": "2024-03-01T01:00:00.000+01:00"},
+                        ],
+                    }
+                }
+            ]
+        }
+        filas = parseo.demanda(payload)
+        self.assertEqual(len(filas), 2)
+        self.assertEqual(filas[0]["momento_utc"], utc(2024, 2, 29, 23, 0))
+        self.assertEqual(filas[0]["demanda_mw"], 26056.6)
+
+    def test_las_dos_series_de_precio_se_cruzan_por_instante(self):
+        payload = {
+            "included": [
+                {
+                    "attributes": {
+                        "title": "PVPC",
+                        "values": [{"value": 51.08, "datetime": "2024-03-01T00:00:00.000+01:00"}],
+                    }
+                },
+                {
+                    "attributes": {
+                        "title": "Precio mercado spot",
+                        "values": [{"value": 2.17, "datetime": "2024-03-01T00:00:00.000+01:00"}],
+                    }
+                },
+            ]
+        }
+        filas = parseo.precio(payload)
+        self.assertEqual(len(filas), 1)
+        self.assertEqual(filas[0]["precio_pvpc_eur_mwh"], 51.08)
+        self.assertEqual(filas[0]["precio_spot_eur_mwh"], 2.17)
+
+    def test_una_serie_de_precio_ausente_deja_nulo_y_no_rompe(self):
+        payload = {
+            "included": [
+                {
+                    "attributes": {
+                        "title": "PVPC",
+                        "values": [{"value": 51.08, "datetime": "2024-03-01T00:00:00.000+01:00"}],
+                    }
+                }
+            ]
+        }
+        filas = parseo.precio(payload)
+        self.assertIsNone(filas[0]["precio_spot_eur_mwh"])
+
+    def test_temperatura_usa_las_reglas_horarias_y_no_el_desfase_declarado(self):
+        payload = {
+            "utc_offset_seconds": 7200,  # el que devuelve la API, incorrecto para marzo
+            "hourly": {"time": ["2024-03-01T00:00"], "temperature_2m": [5.8]},
+        }
+        filas = parseo.temperatura(payload)
+        self.assertEqual(filas[0]["momento_utc"], utc(2024, 2, 29, 23, 0))
+
+    def test_temperatura_rechaza_arrays_descuadrados(self):
+        payload = {"hourly": {"time": ["2024-03-01T00:00", "2024-03-01T01:00"], "temperature_2m": [5.8]}}
+        with self.assertRaises(ValueError):
+            parseo.temperatura(payload)
+
+    def test_la_hora_repetida_de_octubre_no_duplica_filas(self):
+        payload = {
+            "hourly": {
+                "time": ["2024-10-27T02:00", "2024-10-27T02:00"],
+                "temperature_2m": [14.0, 13.5],
+            }
+        }
+        filas = parseo.temperatura(payload)
+        self.assertEqual(len(filas), 1)
+
+    def test_unir_conserva_las_horas_aunque_falte_una_fuente(self):
+        filas = parseo.unir(
+            [{"momento_utc": utc(2024, 3, 1, 0, 0), "demanda_mw": 100.0}],
+            [],
+            [{"momento_utc": utc(2024, 3, 1, 1, 0), "temperatura_c": 5.0}],
+        )
+        self.assertEqual(len(filas), 2)
+        self.assertIsNone(filas[0]["temperatura_c"])
+        self.assertIsNone(filas[1]["demanda_mw"])
+
+    def test_dia_de_clave(self):
+        clave = "fuente=ree_demanda/anio=2024/mes=03/dia=01/datos.json"
+        self.assertEqual(parseo.dia_de_clave(clave), date(2024, 3, 1))
+
+
+class Calidad(unittest.TestCase):
+    def _fila(self, hora, **extra):
+        base = {
+            "momento_utc": utc(2024, 3, 1, hora, 0),
+            "demanda_mw": 25000.0,
+            "precio_pvpc_eur_mwh": 50.0,
+            "precio_spot_eur_mwh": 2.0,
+            "temperatura_c": 10.0,
+        }
+        base.update(extra)
+        return base
+
+    def test_dia_completo_es_valido(self):
+        informe = calidad.revisar([self._fila(h) for h in range(24)], date(2024, 3, 1))
+        self.assertTrue(informe.valido)
+        self.assertEqual(informe.avisos, [])
+
+    def test_dia_sin_filas_es_error(self):
+        self.assertFalse(calidad.revisar([], date(2024, 3, 1)).valido)
+
+    def test_faltan_horas_es_aviso_no_error(self):
+        informe = calidad.revisar([self._fila(h) for h in range(20)], date(2024, 3, 1))
+        self.assertTrue(informe.valido)
+        self.assertTrue(informe.avisos)
+
+    def test_23_filas_el_dia_que_adelanta_no_genera_aviso(self):
+        filas = [
+            {**self._fila(h), "momento_utc": utc(2024, 3, 31, h, 0)} for h in range(23)
+        ]
+        informe = calidad.revisar(filas, date(2024, 3, 31))
+        self.assertEqual(informe.avisos, [])
+
+    def test_instantes_duplicados_son_error(self):
+        informe = calidad.revisar([self._fila(0), self._fila(0)], date(2024, 3, 1))
+        self.assertFalse(informe.valido)
+
+    def test_demanda_fuera_de_rango_es_error(self):
+        informe = calidad.revisar([self._fila(0, demanda_mw=1_000_000.0)], date(2024, 3, 1))
+        self.assertFalse(informe.valido)
+
+    def test_demanda_toda_vacia_es_error(self):
+        informe = calidad.revisar([self._fila(h, demanda_mw=None) for h in range(24)], date(2024, 3, 1))
+        self.assertFalse(informe.valido)
+
+    def test_temperatura_vacia_no_invalida_el_dia(self):
+        informe = calidad.revisar([self._fila(h, temperatura_c=None) for h in range(24)], date(2024, 3, 1))
+        self.assertTrue(informe.valido)
+        self.assertEqual(informe.nulos["temperatura_c"], 24)
+
+
+if __name__ == "__main__":
+    unittest.main()

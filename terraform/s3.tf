@@ -15,6 +15,11 @@ locals {
       versionado = false
       proposito  = "Resultados de las consultas de Athena"
     }
+    artefactos = {
+      nombre     = "${local.prefijo}-artefactos-${local.sufijo}"
+      versionado = true
+      proposito  = "Script y modulos del job de Glue"
+    }
   }
 }
 

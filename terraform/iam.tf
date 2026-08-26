@@ -93,6 +93,15 @@ data "aws_iam_policy_document" "glue_job" {
     resources = [aws_s3_bucket.datos["curated"].arn]
   }
 
+  # Glue descarga el script y los modulos con este mismo rol: sin esto el job
+  # falla al arrancar, antes de ejecutar una sola linea.
+  statement {
+    sid       = "LeerArtefactos"
+    effect    = "Allow"
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.datos["artefactos"].arn}/*"]
+  }
+
   statement {
     sid    = "GestionarCatalogo"
     effect = "Allow"
