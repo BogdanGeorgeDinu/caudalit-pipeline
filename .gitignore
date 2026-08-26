@@ -56,3 +56,6 @@ dist/
 .idea/
 .vscode/
 *.swp
+
+# Artefactos de empaquetado de Lambda
+terraform/.build/

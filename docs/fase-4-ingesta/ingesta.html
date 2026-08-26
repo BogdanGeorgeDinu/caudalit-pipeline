@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cuando la API miente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+
+<style>
+  :root{
+    --bg:#07161A;--surface:#0D2025;--surface-2:#12292F;
+    --ink:#E7F1F0;--muted:#8AA5A5;--line:#1C363C;--line-strong:#294950;
+    --accent:#2FD6C6;--accent-2:#43C0F0;--accent-ink:#65E6D8;
+    --warn:#E8B84B;--stop:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1060px;margin:0 auto;padding:56px 24px 80px}
+
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent-ink);margin:0 0 18px;
+    display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--accent);border-radius:2px}
+  h1{font-family:"Sora",sans-serif;font-weight:800;letter-spacing:-.035em;
+    font-size:clamp(2.1rem,5.5vw,3.4rem);line-height:1.02;margin:0;
+    text-wrap:balance;max-width:18ch}
+  h1 .flow{background:linear-gradient(100deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--muted);font-size:1.14rem;margin:24px 0 0;max-width:64ch}
+
+  h2{font-family:"Sora",sans-serif;font-weight:700;letter-spacing:-.025em;
+    font-size:1.7rem;margin:0 0 6px;line-height:1.1}
+  .sec{margin-top:72px}
+  .sec-lead{color:var(--muted);margin:0 0 28px;max-width:66ch}
+
+  figure{margin:0}
+  .figbox{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    padding:22px 20px 14px;box-shadow:var(--shadow);overflow-x:auto}
+  .figbox svg{display:block;width:100%;min-width:840px;height:auto}
+  figcaption{color:var(--muted);font-size:.92rem;margin-top:16px;max-width:72ch}
+
+  .decisions{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+  .dec{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:22px;display:flex;gap:15px}
+  .dec .mark{width:34px;height:34px;border-radius:9px;flex-shrink:0;
+    background:linear-gradient(135deg,rgba(47,214,198,.18),rgba(67,192,240,.14));
+    display:flex;align-items:center;justify-content:center;color:var(--accent-ink);
+    font-family:"IBM Plex Mono",monospace;font-size:13px}
+  .dec h3{font-family:"Sora",sans-serif;font-weight:600;font-size:1.02rem;
+    margin:4px 0 7px;letter-spacing:-.01em}
+  .dec p{margin:0;color:var(--muted);font-size:.93rem}
+
+  .hallazgo{margin-top:28px;background:var(--surface-2);border:1px solid var(--line-strong);
+    border-left:3px solid var(--accent);border-radius:0 14px 14px 0;padding:24px 26px}
+  .hallazgo h3{font-family:"Sora",sans-serif;font-weight:600;font-size:1.06rem;margin:0 0 12px}
+  .hallazgo p{margin:0 0 12px;color:var(--muted);font-size:.95rem;max-width:76ch}
+  .hallazgo p:last-child{margin-bottom:0}
+  .hallazgo b{color:var(--ink);font-weight:600}
+
+  .cifras{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0 4px}
+  .cifra{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .cifra .v{font-family:"Sora",sans-serif;font-weight:700;font-size:1.5rem;
+    color:var(--accent-ink);line-height:1;font-variant-numeric:tabular-nums}
+  .cifra .k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;
+    text-transform:uppercase;color:var(--muted);margin-top:8px}
+
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;margin-top:24px;font-size:.93rem}
+  caption{text-align:left;color:var(--muted);font-size:.9rem;margin-bottom:12px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);font-weight:500}
+  td.n{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink);
+    font-variant-numeric:tabular-nums;text-align:right}
+  code.chip{font-family:"IBM Plex Mono",monospace;font-size:.85rem;color:var(--accent-ink);
+    background:var(--surface-2);padding:2px 7px;border-radius:5px}
+
+  .next{margin-top:72px;padding-top:28px;border-top:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;justify-content:space-between;
+    color:var(--muted);font-size:.9rem}
+  .next .brand{font-family:"Sora",sans-serif;font-weight:700;color:var(--ink)}
+  .next .it{color:var(--accent-ink)}
+
+  @media (max-width:860px){.decisions{grid-template-columns:1fr}.cifras{grid-template-columns:1fr}}
+  @media (max-width:560px){.wrap{padding:40px 18px 60px}}
+
+  @media print{
+    @page{size:A4;margin:0}
+    html,body{background:var(--bg)}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{font-size:13.5px}
+    .wrap{max-width:none;padding:16mm 14mm}
+    .sec{margin-top:34px}
+    h1{font-size:2.35rem}
+    h2{font-size:1.5rem}
+    .figbox{overflow:visible;padding:16px 14px}
+    .figbox svg{min-width:0}
+    .decisions{grid-template-columns:repeat(2,1fr);gap:12px}
+    .cifras{grid-template-columns:repeat(3,1fr);gap:12px}
+    .dec,.hallazgo,.cifra,figure,.tablewrap,table,tr,.next{break-inside:avoid}
+    .tablewrap{overflow:visible}
+    .next{margin-top:34px}
+  }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Fase 4 · Ingesta</p>
+  <h1>Reintento ante un 400. Justo lo que <span class="flow">no hay que hacer.</span></h1>
+  <p class="lead">
+    Un <code class="chip">400 Bad Request</code> significa que la petición está mal formada.
+    Insistir es un antipatrón: va a fallar igual. Salvo cuando la API miente sobre el motivo
+    del error, que es exactamente lo que hace la de Red Eléctrica.
+  </p>
+
+  <section class="sec">
+    <h2>El mecanismo</h2>
+    <p class="sec-lead">
+      La ingesta no supone que la fuente funciona. Supone que falla, y define qué hacer cuando pasa.
+    </p>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 1000 340" role="img"
+             aria-label="La Lambda consulta la API: los tres primeros intentos devuelven 400 y entre ellos espera 1,5 segundos, 3 segundos y 6 segundos; el cuarto devuelve 200 y el JSON crudo se escribe en S3 particionado por fuente y fecha.">
+          <defs>
+            <marker id="ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="#2FD6C6"/>
+            </marker>
+            <marker id="no" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="#E8776B"/>
+            </marker>
+          </defs>
+
+          <rect x="20" y="112" width="140" height="62" rx="11" fill="#12292F" stroke="#294950"/>
+          <text x="90" y="138" text-anchor="middle" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Lambda</text>
+          <text x="90" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">ingesta-ree</text>
+
+          <line x1="164" y1="143" x2="196" y2="143" stroke="#2FD6C6" stroke-width="1.6" marker-end="url(#ok)"/>
+
+          <rect x="204" y="116" width="104" height="54" rx="10" fill="#0D2025" stroke="#E8776B"/>
+          <text x="256" y="139" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#E8776B">400</text>
+          <text x="256" y="157" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">intento 1</text>
+
+          <line x1="312" y1="143" x2="348" y2="143" stroke="#E8776B" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#no)"/>
+          <text x="330" y="134" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8B84B">1,5 s</text>
+
+          <rect x="356" y="116" width="104" height="54" rx="10" fill="#0D2025" stroke="#E8776B"/>
+          <text x="408" y="139" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#E8776B">400</text>
+          <text x="408" y="157" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">intento 2</text>
+
+          <line x1="464" y1="143" x2="500" y2="143" stroke="#E8776B" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#no)"/>
+          <text x="482" y="134" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8B84B">3 s</text>
+
+          <rect x="508" y="116" width="104" height="54" rx="10" fill="#0D2025" stroke="#E8776B"/>
+          <text x="560" y="139" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#E8776B">400</text>
+          <text x="560" y="157" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">intento 3</text>
+
+          <line x1="616" y1="143" x2="652" y2="143" stroke="#E8776B" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#no)"/>
+          <text x="634" y="134" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8B84B">6 s</text>
+
+          <rect x="660" y="116" width="104" height="54" rx="10" fill="#12292F" stroke="#2FD6C6" stroke-width="1.6"/>
+          <text x="712" y="139" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#65E6D8">200</text>
+          <text x="712" y="157" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">intento 4</text>
+
+          <line x1="768" y1="143" x2="804" y2="143" stroke="#2FD6C6" stroke-width="1.8" marker-end="url(#ok)"/>
+
+          <rect x="812" y="106" width="168" height="74" rx="11" fill="#0D2025" stroke="#2FD6C6"/>
+          <text x="896" y="130" text-anchor="middle" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">S3 · raw</text>
+          <text x="896" y="148" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">JSON sin tocar</text>
+          <text x="896" y="164" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#65E6D8">clave determinista</text>
+
+          <text x="500" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8AA5A5">apidatos.ree.es devuelve 400 &quot;Error Interno&quot; para peticiones correctas</text>
+          <text x="500" y="60" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#65E6D8">y a la siguiente responde 200 con los mismos parametros</text>
+
+          <rect x="20" y="220" width="960" height="90" rx="11" fill="#12292F" stroke="#294950"/>
+          <text x="44" y="246" font-family="Sora, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Espera exponencial con jitter</text>
+          <text x="44" y="268" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#8AA5A5">1,5 s   3 s   6 s   12 s   24 s      + aleatorio de hasta 1 s en cada espera</text>
+          <text x="44" y="290" font-family="IBM Plex Mono, monospace" font-size="10" fill="#E8B84B">sin jitter, varias ejecuciones que fallan a la vez reintentan sincronizadas y golpean el origen en el mismo instante</text>
+        </svg>
+      </div>
+      <figcaption>
+        Medido contra un <code class="chip">400</code> real de la API: 1,3 s, 2,5 s y 4,55 s entre
+        intentos, y una excepción explícita al agotarlos en lugar de un cuelgue silencioso.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="sec">
+    <h2>Las decisiones de esta fase</h2>
+
+    <div class="decisions">
+      <div class="dec">
+        <div class="mark">01</div>
+        <div>
+          <h3>Cero dependencias externas</h3>
+          <p><code class="chip">requests</code> no viene en el runtime de Lambda y empaquetarlo obliga a montar un paso de build. <code class="chip">urllib</code> de la biblioteca estándar hace lo mismo aquí, y Terraform despliega la función sin construir nada.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">02</div>
+        <div>
+          <h3>Un artefacto, dos funciones</h3>
+          <p>Ambas comparten el cliente HTTP. En lugar de duplicar el módulo o mantener una <em>Layer</em> para ochenta líneas, se empaqueta una vez y cada función apunta a un <code class="chip">handler</code> distinto.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">03</div>
+        <div>
+          <h3>Clave determinista, ingesta idempotente</h3>
+          <p>La ruta en S3 depende de la fuente y de la fecha del dato, nunca del momento de ejecución. Reprocesar un día sobrescribe su archivo en vez de duplicarlo, así que la ingesta se puede repetir sin ensuciar nada.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">04</div>
+        <div>
+          <h3>Logs en JSON, no en prosa</h3>
+          <p>Cada evento es una línea JSON con su tipo. Permite filtrar en CloudWatch por <code class="chip">http_reintento</code> y medir cuántas veces falla la fuente en producción, en lugar de suponerlo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>La primera ingesta real</h2>
+    <p class="sec-lead">Invocación de ambas funciones sobre el 1 de marzo de 2024.</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Fuente</th><th style="text-align:right">Puntos</th><th style="text-align:right">Bytes</th><th>Resultado</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="chip">ree_demanda</code></td><td class="n">24</td><td class="n">2.545</td><td>Pico de 33,8 GW</td></tr>
+          <tr><td><code class="chip">ree_precio</code></td><td class="n">24</td><td class="n">5.207</td><td>Media de 2,1 EUR/MWh</td></tr>
+          <tr><td><code class="chip">clima_temperatura</code></td><td class="n">24</td><td class="n">910</td><td>Media de 6,8 °C</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hallazgo">
+      <h3>Un día frío, con mucha demanda y la luz casi regalada</h3>
+      <div class="cifras">
+        <div class="cifra"><div class="v">6,8 °C</div><div class="k">temperatura media</div></div>
+        <div class="cifra"><div class="v">33,8 GW</div><div class="k">pico de demanda</div></div>
+        <div class="cifra"><div class="v">2,1 €</div><div class="k">precio medio / MWh</div></div>
+      </div>
+      <p style="margin-top:18px">
+        Según la hipótesis del proyecto, frío significa demanda alta, y demanda alta significa
+        precio alto. Los dos primeros datos encajan. El tercero no: <b>2,1 €/MWh es prácticamente
+        regalado</b>.
+      </p>
+      <p>
+        La explicación es el viento. Marzo de 2024 batió récords de generación eólica en España,
+        y cuando sobra renovable barata el precio se hunde por mucho que suba el consumo.
+      </p>
+      <p>
+        Es la primera señal, con datos reales del propio pipeline, de que <b>la relación no va a
+        ser una recta</b>. La temperatura explicará bien la demanda; el precio, solo en parte.
+        Ese matiz es el resultado interesante, no el fracaso del proyecto.
+      </p>
+    </div>
+  </section>
+
+  <div class="next">
+    <span><span class="brand">Caudal<span class="it">it</span></span> · Fase 4 de 10 · Ingesta</span>
+    <span>Siguiente: Glue y PySpark — aplanar, normalizar husos horarios y cruzar por hora</span>
+  </div>
+
+</div>
+
+</head>
+</html>

@@ -29,7 +29,7 @@ docs/fase-N-nombre/
 | 1 | Arquitectura | Cerrada — [`fase-1-arquitectura/`](fase-1-arquitectura/) |
 | 2 | Repo, estructura y `.gitignore` | Cerrada — [`fase-2-repositorio/`](fase-2-repositorio/) |
 | 3 | Terraform: backend, S3, IAM, Glue DB, Athena | Cerrada — [`fase-3-terraform/`](fase-3-terraform/) |
-| 4 | Ingesta: Lambdas con reintentos | Pendiente |
+| 4 | Ingesta: Lambdas con reintentos | Cerrada — [`fase-4-ingesta/`](fase-4-ingesta/) |
 | 5 | Transformación: Glue + PySpark | Pendiente |
 | 6 | Consulta: Athena | Pendiente |
 | 7 | Orquestación: Step Functions | Pendiente |

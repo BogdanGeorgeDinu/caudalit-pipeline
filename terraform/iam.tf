@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "lambda_ingesta" {
       "logs:CreateLogStream",
       "logs:PutLogEvents",
     ]
-    resources = ["${aws_cloudwatch_log_group.lambda_ingesta.arn}:*"]
+    resources = [for g in aws_cloudwatch_log_group.ingesta : "${g.arn}:*"]
   }
 }
 
@@ -39,13 +39,6 @@ resource "aws_iam_role_policy" "lambda_ingesta" {
   name   = "${local.prefijo}-lambda-ingesta"
   role   = aws_iam_role.lambda_ingesta.id
   policy = data.aws_iam_policy_document.lambda_ingesta.json
-}
-
-# Declarado aquí para que tenga retención. Los grupos que crea Lambda por su
-# cuenta se guardan indefinidamente.
-resource "aws_cloudwatch_log_group" "lambda_ingesta" {
-  name              = "/aws/lambda/${local.prefijo}-ingesta"
-  retention_in_days = var.retencion_logs_dias
 }
 
 data "aws_iam_policy_document" "glue_asumir" {
