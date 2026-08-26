@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Fase 5</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1200px;height:630px;background:#07161A;color:#E7F1F0;overflow:hidden;
+  font-family:"IBM Plex Sans",system-ui,sans-serif;padding:44px 54px;display:flex;flex-direction:column}
+.top{display:flex;align-items:baseline;justify-content:space-between}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.18em;
+  text-transform:uppercase;color:#65E6D8;display:flex;align-items:center;gap:11px}
+.eyebrow::before{content:"";width:28px;height:2px;background:#2FD6C6;border-radius:2px}
+.brand{font-family:"Sora",sans-serif;font-weight:700;font-size:19px;letter-spacing:-.02em}
+.brand .it{color:#65E6D8}
+h1{font-family:"Sora",sans-serif;font-weight:800;font-size:41px;letter-spacing:-.035em;
+  line-height:1.05;margin:14px 0 6px}
+h1 .flow{background:linear-gradient(100deg,#2FD6C6,#43C0F0);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:#8AA5A5;font-size:16.5px;margin-bottom:10px}
+.figbox{flex:1;background:#0D2025;border:1px solid #1C363C;border-radius:16px;
+  padding:8px 18px;display:flex;align-items:center}
+svg{width:100%;height:auto;display:block}
+</style></head><body>
+<div class="top">
+  <span class="eyebrow">Fase 5 de 10 &middot; Transformaci&oacute;n</span>
+  <span class="brand">Caudal<span class="it">it</span></span>
+</div>
+<h1>El pipeline no fallaba. <span class="flow">Ment&iacute;a.</span></h1>
+<p class="sub">La API devolv&iacute;a el desfase horario del d&iacute;a de la petici&oacute;n, no el de los datos &middot; pipeline de datos en AWS, construido en abierto</p>
+<div class="figbox"><svg viewBox="0 0 1000 372" role="img"
+  aria-label="Tres filas horarias. Arriba, la demanda de Red Electrica en horas locales de Madrid. En medio, la temperatura de Open-Meteo emparejada con una hora de desfase si se usa el campo utc_offset_seconds que devuelve la API. Abajo, la temperatura correctamente alineada al resolver la hora local con las reglas horarias de Europe Madrid.">
+
+  <defs>
+    <marker id="f5ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#2FD6C6"/>
+    </marker>
+    <marker id="f5no" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#E8776B"/>
+    </marker>
+  </defs>
+
+  <text x="16" y="40" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8AA5A5">DEMANDA &middot; REE</text>
+  <text x="16" y="56" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5C7375">hora local + desfase</text>
+
+  <rect x="210" y="22" width="118" height="48" rx="9" fill="#12292F" stroke="#294950"/>
+  <text x="269" y="43" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">00:00</text>
+  <text x="269" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">26 057 MW</text>
+
+  <rect x="342" y="22" width="118" height="48" rx="9" fill="#12292F" stroke="#294950"/>
+  <text x="401" y="43" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">01:00</text>
+  <text x="401" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">24 570 MW</text>
+
+  <rect x="474" y="22" width="118" height="48" rx="9" fill="#12292F" stroke="#294950"/>
+  <text x="533" y="43" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">02:00</text>
+  <text x="533" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">23 472 MW</text>
+
+  <rect x="606" y="22" width="118" height="48" rx="9" fill="#12292F" stroke="#294950"/>
+  <text x="665" y="43" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">03:00</text>
+  <text x="665" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">23 059 MW</text>
+
+  <rect x="738" y="22" width="118" height="48" rx="9" fill="#12292F" stroke="#294950"/>
+  <text x="797" y="43" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">04:00</text>
+  <text x="797" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">22 904 MW</text>
+
+  <line x1="269" y1="74" x2="397" y2="150" stroke="#E8776B" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#f5no)"/>
+  <line x1="401" y1="74" x2="529" y2="150" stroke="#E8776B" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#f5no)"/>
+  <line x1="533" y1="74" x2="661" y2="150" stroke="#E8776B" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#f5no)"/>
+  <line x1="665" y1="74" x2="793" y2="150" stroke="#E8776B" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#f5no)"/>
+
+  <text x="16" y="176" font-family="IBM Plex Mono, monospace" font-size="11" fill="#E8776B">SI TE F&Iacute;AS DEL CAMPO</text>
+  <text x="16" y="192" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5C7375">utc_offset_seconds: 7200</text>
+
+  <rect x="210" y="158" width="118" height="48" rx="9" fill="#0D2025" stroke="#3A2422"/>
+  <text x="269" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#5C7375">00:00</text>
+  <text x="269" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5C7375">5,8 &deg;C</text>
+
+  <rect x="342" y="158" width="118" height="48" rx="9" fill="#1E1416" stroke="#E8776B"/>
+  <text x="401" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E8776B">01:00</text>
+  <text x="401" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8A79E">4,7 &deg;C</text>
+
+  <rect x="474" y="158" width="118" height="48" rx="9" fill="#1E1416" stroke="#E8776B"/>
+  <text x="533" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E8776B">02:00</text>
+  <text x="533" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8A79E">3,9 &deg;C</text>
+
+  <rect x="606" y="158" width="118" height="48" rx="9" fill="#1E1416" stroke="#E8776B"/>
+  <text x="665" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E8776B">03:00</text>
+  <text x="665" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8A79E">3,8 &deg;C</text>
+
+  <rect x="738" y="158" width="118" height="48" rx="9" fill="#1E1416" stroke="#E8776B"/>
+  <text x="797" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E8776B">04:00</text>
+  <text x="797" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8A79E">3,8 &deg;C</text>
+
+  <text x="880" y="186" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#E8776B">1 h de sesgo</text>
+
+  <line x1="269" y1="74" x2="269" y2="286" stroke="#2FD6C6" stroke-width="1.5" opacity=".28"/>
+  <line x1="401" y1="74" x2="401" y2="286" stroke="#2FD6C6" stroke-width="1.5" opacity=".28"/>
+  <line x1="533" y1="74" x2="533" y2="286" stroke="#2FD6C6" stroke-width="1.5" opacity=".28"/>
+  <line x1="665" y1="74" x2="665" y2="286" stroke="#2FD6C6" stroke-width="1.5" opacity=".28"/>
+  <line x1="797" y1="74" x2="797" y2="286" stroke="#2FD6C6" stroke-width="1.5" opacity=".28" marker-end="url(#f5ok)"/>
+
+  <text x="16" y="312" font-family="IBM Plex Mono, monospace" font-size="11" fill="#65E6D8">CON LAS REGLAS HORARIAS</text>
+  <text x="16" y="328" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5C7375">Europe/Madrid &rarr; UTC</text>
+
+  <rect x="210" y="294" width="118" height="48" rx="9" fill="#0E2A2C" stroke="#2FD6C6"/>
+  <text x="269" y="315" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#65E6D8">00:00</text>
+  <text x="269" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">5,8 &deg;C</text>
+
+  <rect x="342" y="294" width="118" height="48" rx="9" fill="#0E2A2C" stroke="#2FD6C6"/>
+  <text x="401" y="315" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#65E6D8">01:00</text>
+  <text x="401" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">4,7 &deg;C</text>
+
+  <rect x="474" y="294" width="118" height="48" rx="9" fill="#0E2A2C" stroke="#2FD6C6"/>
+  <text x="533" y="315" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#65E6D8">02:00</text>
+  <text x="533" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">3,9 &deg;C</text>
+
+  <rect x="606" y="294" width="118" height="48" rx="9" fill="#0E2A2C" stroke="#2FD6C6"/>
+  <text x="665" y="315" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#65E6D8">03:00</text>
+  <text x="665" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">3,8 &deg;C</text>
+
+  <rect x="738" y="294" width="118" height="48" rx="9" fill="#0E2A2C" stroke="#2FD6C6"/>
+  <text x="797" y="315" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#65E6D8">04:00</text>
+  <text x="797" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">3,8 &deg;C</text>
+
+  <text x="880" y="322" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#65E6D8">alineado</text>
+</svg></div>
+</body></html>
