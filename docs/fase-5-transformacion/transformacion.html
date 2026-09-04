@@ -365,14 +365,62 @@
       </p>
 
       <div class="cifras">
-        <div class="cifra"><div class="v">31</div><div class="k">tests en total</div></div>
-        <div class="cifra"><div class="v">26</div><div class="k">sin Spark, en milisegundos</div></div>
-        <div class="cifra"><div class="v">5</div><div class="k">con sesi&oacute;n de Spark real</div></div>
+        <div class="cifra"><div class="v">45</div><div class="k">tests en total</div></div>
+        <div class="cifra"><div class="v">35</div><div class="k">sin Spark, en milisegundos</div></div>
+        <div class="cifra"><div class="v">10</div><div class="k">con sesi&oacute;n de Spark real</div></div>
       </div>
 
       <p style="margin-top:18px">
         Regla que queda para el resto del proyecto: <b>al menos una comprobaci&oacute;n por fuente
         tiene que atarse al dato de origen</b>, no a otra implementaci&oacute;n propia.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Los dos d&iacute;as que no tienen 24 horas</h2>
+    <p class="sec-lead">
+      Probados con datos reales, porque son el caso donde las tres fuentes pueden
+      descuadrar sin que nada falle.
+    </p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>D&iacute;a</th>
+            <th style="text-align:right">Horas locales</th>
+            <th style="text-align:right">Filas</th>
+            <th style="text-align:right">Errores</th>
+            <th style="text-align:right">Avisos</th>
+            <th style="text-align:right">Nulos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="chip">2024-03-31</code> adelanta</td><td class="n">23</td><td class="n">23</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+          <tr><td><code class="chip">2024-10-27</code> atrasa</td><td class="n">25</td><td class="n">25</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hallazgo">
+      <h3>Un segundo fallo silencioso que el cambio a UTC arregla de paso</h3>
+      <p>
+        El 31 de marzo la hora local salta de 01:00 a 03:00 y las 02:00 no aparecen, que es
+        lo correcto: no llegan a ocurrir. El 27 de octubre las 02:00 locales aparecen
+        <b>dos veces</b>, con desfases <code class="chip">+02:00</code> y
+        <code class="chip">+01:00</code>, separadas una hora en UTC y con temperaturas distintas.
+      </p>
+      <p>
+        Eso la ingesta anterior no pod&iacute;a hacerlo. Pidiendo la temperatura en
+        <code class="chip">Europe/Madrid</code>, Open-Meteo devuelve <b>24 etiquetas a desfase
+        fijo para un d&iacute;a que tiene 25 horas</b>: una de las dos 02:00 simplemente no
+        exist&iacute;a. Verificado contra la API.
+      </p>
+      <p>
+        Era un fallo independiente del desfase de invierno, y ninguna de las dos versiones de
+        la suite lo habr&iacute;a visto, porque no hab&iacute;a ning&uacute;n test sobre un
+        d&iacute;a de cambio de hora con datos reales. Ahora hay nueve.
       </p>
     </div>
   </section>

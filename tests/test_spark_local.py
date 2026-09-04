@@ -8,6 +8,7 @@ no debe depender de tener un Spark en la máquina.
     tests/venv/bin/python -m unittest tests.test_spark_local -v
 """
 
+import json
 import pathlib
 import shutil
 import sys
@@ -25,14 +26,16 @@ except ImportError:  # pragma: no cover
 
 DATOS = pathlib.Path(__file__).resolve().parent / "datos"
 DIA = date(2024, 3, 1)
+ATRASA = date(2024, 10, 27)  # 25 horas locales: la hora repetida de octubre
+
+_SESION = None
 
 
-@unittest.skipIf(SparkSession is None, "pyspark no instalado")
-@unittest.skipIf(not DATOS.exists(), "faltan los ficheros de ejemplo en tests/datos")
-class SparkContraReferencia(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.spark = (
+def sesion():
+    """Una sola sesión para todas las clases: levantar Spark es lo caro."""
+    global _SESION
+    if _SESION is None:
+        _SESION = (
             SparkSession.builder.appName("prueba-curated")
             .master("local[1]")
             .config("spark.sql.session.timeZone", "UTC")
@@ -40,7 +43,16 @@ class SparkContraReferencia(unittest.TestCase):
             .config("spark.ui.enabled", "false")
             .getOrCreate()
         )
-        cls.spark.sparkContext.setLogLevel("ERROR")
+        _SESION.sparkContext.setLogLevel("ERROR")
+    return _SESION
+
+
+@unittest.skipIf(SparkSession is None, "pyspark no instalado")
+@unittest.skipIf(not DATOS.exists(), "faltan los ficheros de ejemplo en tests/datos")
+class SparkContraReferencia(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.spark = sesion()
 
         import transformacion
 
@@ -48,14 +60,8 @@ class SparkContraReferencia(unittest.TestCase):
         cls.informe = transformacion.revisar(cls.filas, DIA)
         cls.transformacion = transformacion
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.spark.stop()
-
     def referencia(self):
         """Las mismas filas calculadas sin Spark."""
-        import json
-
         import parseo
 
         def cargar(fuente):
@@ -121,8 +127,6 @@ class SparkContraReferencia(unittest.TestCase):
         Open-Meteo se pide con timezone=UTC, de modo que la etiqueta del
         payload es directamente el instante que debe aparecer en curated.
         """
-        import json
-
         ruta = (
             DATOS / "fuente=clima_temperatura" / f"anio={DIA.year:04d}"
             / f"mes={DIA.month:02d}" / f"dia={DIA.day:02d}" / "datos.json"
@@ -161,6 +165,94 @@ class SparkContraReferencia(unittest.TestCase):
             self.assertIn("momento_local", leido.columns)
         finally:
             shutil.rmtree(destino, ignore_errors=True)
+
+
+@unittest.skipIf(SparkSession is None, "pyspark no instalado")
+@unittest.skipIf(not DATOS.exists(), "faltan los ficheros de ejemplo en tests/datos")
+class SparkElDiaQueAtrasa(unittest.TestCase):
+    """27 de octubre de 2024 en Spark: 25 horas y una hora local repetida.
+
+    Es el dia mas dificil del ano para este pipeline y el que la ingesta
+    anterior no podia procesar: pedida en hora local, Open-Meteo devolvia 24
+    etiquetas a desfase fijo y una de las dos 02:00 se perdia.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import transformacion
+
+        cls.transformacion = transformacion
+        cls.filas = transformacion.transformar(sesion(), str(DATOS), ATRASA).cache()
+        cls.informe = transformacion.revisar(cls.filas, ATRASA)
+
+    def test_salen_las_25_horas_sin_errores(self):
+        self.assertEqual(self.informe["filas"], 25)
+        self.assertEqual(self.informe["filas_esperadas"], 25)
+        self.assertEqual(self.informe["errores"], [])
+        self.assertEqual(self.informe["avisos"], [])
+
+    def test_ninguna_hora_queda_sin_temperatura(self):
+        self.assertEqual(self.informe["nulos_temperatura_c"], 0)
+        self.assertEqual(self.informe["nulos_demanda_mw"], 0)
+
+    def test_los_25_instantes_son_distintos(self):
+        self.assertEqual(self.informe["filas"], self.informe["instantes"])
+
+    def test_la_hora_repetida_son_dos_instantes_separados_una_hora(self):
+        from pyspark.sql import functions as F
+
+        marcas = [
+            r["marca"]
+            for r in (
+                self.filas.withColumn(
+                    "marca", F.date_format("momento_utc", "yyyy-MM-dd HH:mm:ss")
+                )
+                .orderBy("momento_utc")
+                .collect()
+            )
+        ]
+        # 02:00 y 03:00 UTC del 27 son las dos 02:00 locales de Madrid.
+        self.assertIn("2024-10-27 00:00:00", marcas)
+        self.assertIn("2024-10-27 01:00:00", marcas)
+        self.assertEqual(marcas[0], "2024-10-26 22:00:00")
+        self.assertEqual(marcas[-1], "2024-10-27 22:00:00")
+
+    def test_spark_coincide_con_la_referencia_en_python(self):
+        from pyspark.sql import functions as F
+
+        import parseo
+
+        def cargar(fuente):
+            ruta = (
+                DATOS / f"fuente={fuente}" / f"anio={ATRASA.year:04d}"
+                / f"mes={ATRASA.month:02d}" / f"dia={ATRASA.day:02d}" / "datos.json"
+            )
+            return json.loads(ruta.read_text(encoding="utf-8"))
+
+        esperadas = parseo.unir(
+            parseo.demanda(cargar("ree_demanda")),
+            parseo.precio(cargar("ree_precio")),
+            parseo.temperatura(cargar("clima_temperatura"), ATRASA),
+        )
+        obtenidas = sorted(
+            (
+                r.asDict()
+                for r in self.filas.withColumn(
+                    "marca", F.date_format("momento_utc", "yyyy-MM-dd HH:mm:ss")
+                ).collect()
+            ),
+            key=lambda f: f["marca"],
+        )
+
+        self.assertEqual(len(obtenidas), len(esperadas))
+        for got, exp in zip(obtenidas, esperadas):
+            self.assertEqual(got["marca"], exp["momento_utc"].strftime("%Y-%m-%d %H:%M:%S"))
+            self.assertAlmostEqual(got["temperatura_c"], exp["temperatura_c"], places=6)
+
+
+def tearDownModule():
+    if _SESION is not None:
+        _SESION.stop()
 
 
 if __name__ == "__main__":

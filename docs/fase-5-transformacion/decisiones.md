@@ -201,9 +201,28 @@ los ficheros reales del 1 de marzo de 2024, y además contra el JSON crudo.
 | El parquet se escribe en `anio=2024/mes=03/dia=01` | correcto |
 | Al releerlo salen 24 filas con `momento_local` | correcto |
 
-Son **31 tests**: 26 de reglas horarias, aplanado y calidad que no necesitan Spark
-y corren en milisegundos, y 5 que levantan una sesión local. Los de Spark se saltan
-solos si PySpark no está instalado.
+### Los dos días que no tienen 24 horas
+Se probaron con datos reales, porque son el caso donde las tres fuentes pueden
+descuadrar sin que nada falle:
+
+| Día | Horas locales | Filas | Errores | Avisos | Nulos |
+|---|---|---|---|---|---|
+| 2024-03-31 (adelanta) | 23 | 23 | 0 | 0 | 0 |
+| 2024-10-27 (atrasa) | 25 | 25 | 0 | 0 | 0 |
+
+El 31 de marzo la hora local salta de 01:00 a 03:00 y las 02:00 no aparecen, que es
+lo correcto: no llegan a ocurrir. El 27 de octubre las 02:00 locales aparecen **dos
+veces**, con desfases `+02:00` y `+01:00`, separadas una hora en UTC y con temperaturas
+distintas.
+
+Esto último **la ingesta anterior no podía hacerlo**. Pidiendo la temperatura en
+`Europe/Madrid`, Open-Meteo devuelve 24 etiquetas a desfase fijo para un día que tiene
+25 horas: una de las dos 02:00 simplemente no existía. Verificado contra la API. Era un
+segundo fallo silencioso, independiente del desfase de invierno, que el cambio a UTC
+arregla de paso.
+
+Son **45 tests**: 35 sin Spark, que corren en milisegundos, y 10 que levantan una
+sesión local. Los de Spark se saltan solos si PySpark no está instalado.
 
 ## Lo que sigue sin probarse
 El job **no se ha ejecutado en Glue**. Queda por confirmar en la primera ejecución
@@ -224,14 +243,15 @@ Esa ejecución cuesta unos cuatro céntimos.
 ## Cómo se ejecutan las pruebas
 
 ```bash
-# Rapido, sin Spark: 26 tests en milisegundos
+# Rapido, sin Spark: 35 tests en milisegundos
 python3 -m unittest discover -s tests
 
 # Completo, con Spark local
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17
 export PYSPARK_PYTHON=/ruta/al/venv/bin/python
 export PYSPARK_DRIVER_PYTHON=$PYSPARK_PYTHON
-venv/bin/python -m unittest tests.test_transformacion tests.test_spark_local
+venv/bin/python -m unittest tests.test_transformacion \
+    tests.test_cambio_de_hora tests.test_spark_local
 ```
 
 PySpark necesita Python 3.11 o 3.12 y Java 17. Si el worker y el driver usan
