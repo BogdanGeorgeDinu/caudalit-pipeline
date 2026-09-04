@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>El bug silencioso era mi arreglo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+
+<style>
+  :root{
+    --bg:#07161A;--surface:#0D2025;--surface-2:#12292F;
+    --ink:#E7F1F0;--muted:#8AA5A5;--line:#1C363C;--line-strong:#294950;
+    --accent:#2FD6C6;--accent-2:#43C0F0;--accent-ink:#65E6D8;
+    --warn:#E8B84B;--stop:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1060px;margin:0 auto;padding:56px 24px 80px}
+
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent-ink);margin:0 0 18px;
+    display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--accent);border-radius:2px}
+  h1{font-family:"Sora",sans-serif;font-weight:800;letter-spacing:-.035em;
+    font-size:clamp(2.1rem,5.5vw,3.4rem);line-height:1.02;margin:0;
+    text-wrap:balance;max-width:18ch}
+  h1 .flow{background:linear-gradient(100deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--muted);font-size:1.14rem;margin:24px 0 0;max-width:64ch}
+
+  h2{font-family:"Sora",sans-serif;font-weight:700;letter-spacing:-.025em;
+    font-size:1.7rem;margin:0 0 6px;line-height:1.1}
+  .sec{margin-top:72px}
+  .sec-lead{color:var(--muted);margin:0 0 28px;max-width:66ch}
+
+  figure{margin:0}
+  .figbox{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    padding:22px 20px 14px;box-shadow:var(--shadow);overflow-x:auto}
+  .figbox svg{display:block;width:100%;min-width:840px;height:auto}
+  figcaption{color:var(--muted);font-size:.92rem;margin-top:16px;max-width:72ch}
+
+  .decisions{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+  .dec{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:22px;display:flex;gap:15px}
+  .dec .mark{width:34px;height:34px;border-radius:9px;flex-shrink:0;
+    background:linear-gradient(135deg,rgba(47,214,198,.18),rgba(67,192,240,.14));
+    display:flex;align-items:center;justify-content:center;color:var(--accent-ink);
+    font-family:"IBM Plex Mono",monospace;font-size:13px}
+  .dec h3{font-family:"Sora",sans-serif;font-weight:600;font-size:1.02rem;
+    margin:4px 0 7px;letter-spacing:-.01em}
+  .dec p{margin:0;color:var(--muted);font-size:.93rem}
+
+  .hallazgo{margin-top:28px;background:var(--surface-2);border:1px solid var(--line-strong);
+    border-left:3px solid var(--accent);border-radius:0 14px 14px 0;padding:24px 26px}
+  .hallazgo h3{font-family:"Sora",sans-serif;font-weight:600;font-size:1.06rem;margin:0 0 12px}
+  .hallazgo p{margin:0 0 12px;color:var(--muted);font-size:.95rem;max-width:76ch}
+  .hallazgo p:last-child{margin-bottom:0}
+  .hallazgo b{color:var(--ink);font-weight:600}
+
+  .cifras{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0 4px}
+  .cifra{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .cifra .v{font-family:"Sora",sans-serif;font-weight:700;font-size:1.5rem;
+    color:var(--accent-ink);line-height:1;font-variant-numeric:tabular-nums}
+  .cifra .k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;
+    text-transform:uppercase;color:var(--muted);margin-top:8px}
+
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;margin-top:24px;font-size:.93rem}
+  caption{text-align:left;color:var(--muted);font-size:.9rem;margin-bottom:12px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);font-weight:500}
+  td.n{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink);
+    font-variant-numeric:tabular-nums;text-align:right}
+  code.chip{font-family:"IBM Plex Mono",monospace;font-size:.85rem;color:var(--accent-ink);
+    background:var(--surface-2);padding:2px 7px;border-radius:5px}
+
+  .next{margin-top:72px;padding-top:28px;border-top:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;justify-content:space-between;
+    color:var(--muted);font-size:.9rem}
+  .next .brand{font-family:"Sora",sans-serif;font-weight:700;color:var(--ink)}
+  .next .it{color:var(--accent-ink)}
+
+  @media (max-width:860px){.decisions{grid-template-columns:1fr}.cifras{grid-template-columns:1fr}}
+  @media (max-width:560px){.wrap{padding:40px 18px 60px}}
+
+  @media print{
+    @page{size:A4;margin:0}
+    html,body{background:var(--bg)}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{font-size:13.5px}
+    .wrap{max-width:none;padding:16mm 14mm}
+    .sec{margin-top:34px}
+    h1{font-size:2.35rem}
+    h2{font-size:1.5rem}
+    .figbox{overflow:visible;padding:16px 14px}
+    .figbox svg{min-width:0}
+    .decisions{grid-template-columns:repeat(2,1fr);gap:12px}
+    .cifras{grid-template-columns:repeat(3,1fr);gap:12px}
+    .dec,.hallazgo,.cifra,figure,.tablewrap,table,tr,.next{break-inside:avoid}
+    .tablewrap{overflow:visible}
+    .next{margin-top:34px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <p class="eyebrow">Fase 5 &middot; Transformaci&oacute;n</p>
+  <h1>El bug silencioso <span class="flow">era mi arreglo.</span></h1>
+  <p class="lead">
+    Open-Meteo devuelve las horas sin desfase y, en otro campo, el desfase que ha aplicado.
+    Ese campo parec&iacute;a estar mal. La conclusi&oacute;n fue ignorarlo &mdash; y esa
+    conclusi&oacute;n desplazaba una hora todas las temperaturas de invierno, sin que
+    fallara nada.
+  </p>
+
+  <section class="sec">
+    <h2>El sesgo de una hora</h2>
+    <p class="sec-lead">
+      La misma medianoche del 1 de marzo, vista por las dos fuentes y por los dos arreglos.
+    </p>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 1000 372" role="img"
+  aria-label="Tres filas horarias. Arriba, la demanda de Red Electrica en horas locales de Madrid. En medio, la temperatura de Open-Meteo con una hora de sesgo al reinterpretar la etiqueta como hora de Madrid, que fue el primer arreglo y resulto ser el error. Abajo, la temperatura correctamente alineada al pedir la serie directamente en UTC.">
+
+  <defs>
+    <marker id="f5ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#2FD6C6"/>
+    </marker>
+    <marker id="f5no" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#E8776B"/>
+    </marker>
+  </defs>
+
+  <text x="16" y="40" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8AA5A5">DEMANDA &middot; REE</text>
+  <text x="16" y="56" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5C7375">hora local + desfase</text>
+
+  <rect x="210" y="22" width="118" height="48" rx="9" fill="#12292F" stroke="#294950"/>
+  <text x="269" y="43" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">00:00</text>
+  <text x="269" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">26 057 MW</text>
+
+  <rect x="342" y="22" width="118" height="48" rx="9" fill="#12292F" stroke="#294950"/>
+  <text x="401" y="43" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">01:00</text>
+  <text x="401" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">24 570 MW</text>
+
+  <rect x="474" y="22" width="118" height="48" rx="9" fill="#12292F" stroke="#294950"/>
+  <text x="533" y="43" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">02:00</text>
+  <text x="533" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">23 472 MW</text>
+
+  <rect x="606" y="22" width="118" height="48" rx="9" fill="#12292F" stroke="#294950"/>
+  <text x="665" y="43" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">03:00</text>
+  <text x="665" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">23 059 MW</text>
+
+  <rect x="738" y="22" width="118" height="48" rx="9" fill="#12292F" stroke="#294950"/>
+  <text x="797" y="43" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E7F1F0">04:00</text>
+  <text x="797" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">22 904 MW</text>
+
+  <line x1="269" y1="74" x2="397" y2="150" stroke="#E8776B" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#f5no)"/>
+  <line x1="401" y1="74" x2="529" y2="150" stroke="#E8776B" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#f5no)"/>
+  <line x1="533" y1="74" x2="661" y2="150" stroke="#E8776B" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#f5no)"/>
+  <line x1="665" y1="74" x2="793" y2="150" stroke="#E8776B" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#f5no)"/>
+
+  <text x="16" y="176" font-family="IBM Plex Mono, monospace" font-size="11" fill="#E8776B">REINTERPRETANDO A MADRID</text>
+  <text x="16" y="192" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5C7375">el primer arreglo, incorrecto</text>
+
+  <rect x="210" y="158" width="118" height="48" rx="9" fill="#0D2025" stroke="#3A2422"/>
+  <text x="269" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#5C7375">00:00</text>
+  <text x="269" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5C7375">5,8 &deg;C</text>
+
+  <rect x="342" y="158" width="118" height="48" rx="9" fill="#1E1416" stroke="#E8776B"/>
+  <text x="401" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E8776B">01:00</text>
+  <text x="401" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8A79E">4,7 &deg;C</text>
+
+  <rect x="474" y="158" width="118" height="48" rx="9" fill="#1E1416" stroke="#E8776B"/>
+  <text x="533" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E8776B">02:00</text>
+  <text x="533" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8A79E">3,9 &deg;C</text>
+
+  <rect x="606" y="158" width="118" height="48" rx="9" fill="#1E1416" stroke="#E8776B"/>
+  <text x="665" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E8776B">03:00</text>
+  <text x="665" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8A79E">3,8 &deg;C</text>
+
+  <rect x="738" y="158" width="118" height="48" rx="9" fill="#1E1416" stroke="#E8776B"/>
+  <text x="797" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E8776B">04:00</text>
+  <text x="797" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#E8A79E">3,8 &deg;C</text>
+
+  <text x="880" y="186" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#E8776B">1 h de sesgo</text>
+
+  <line x1="269" y1="74" x2="269" y2="286" stroke="#2FD6C6" stroke-width="1.5" opacity=".28"/>
+  <line x1="401" y1="74" x2="401" y2="286" stroke="#2FD6C6" stroke-width="1.5" opacity=".28"/>
+  <line x1="533" y1="74" x2="533" y2="286" stroke="#2FD6C6" stroke-width="1.5" opacity=".28"/>
+  <line x1="665" y1="74" x2="665" y2="286" stroke="#2FD6C6" stroke-width="1.5" opacity=".28"/>
+  <line x1="797" y1="74" x2="797" y2="286" stroke="#2FD6C6" stroke-width="1.5" opacity=".28" marker-end="url(#f5ok)"/>
+
+  <text x="16" y="312" font-family="IBM Plex Mono, monospace" font-size="11" fill="#65E6D8">PIDIENDO timezone=UTC</text>
+  <text x="16" y="328" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5C7375">la marca ya es un instante</text>
+
+  <rect x="210" y="294" width="118" height="48" rx="9" fill="#0E2A2C" stroke="#2FD6C6"/>
+  <text x="269" y="315" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#65E6D8">00:00</text>
+  <text x="269" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">4,7 &deg;C</text>
+
+  <rect x="342" y="294" width="118" height="48" rx="9" fill="#0E2A2C" stroke="#2FD6C6"/>
+  <text x="401" y="315" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#65E6D8">01:00</text>
+  <text x="401" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">3,9 &deg;C</text>
+
+  <rect x="474" y="294" width="118" height="48" rx="9" fill="#0E2A2C" stroke="#2FD6C6"/>
+  <text x="533" y="315" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#65E6D8">02:00</text>
+  <text x="533" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">3,8 &deg;C</text>
+
+  <rect x="606" y="294" width="118" height="48" rx="9" fill="#0E2A2C" stroke="#2FD6C6"/>
+  <text x="665" y="315" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#65E6D8">03:00</text>
+  <text x="665" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">3,8 &deg;C</text>
+
+  <rect x="738" y="294" width="118" height="48" rx="9" fill="#0E2A2C" stroke="#2FD6C6"/>
+  <text x="797" y="315" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#65E6D8">04:00</text>
+  <text x="797" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">3,0 &deg;C</text>
+
+  <text x="880" y="322" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#65E6D8">alineado</text>
+</svg>
+      </div>
+      <figcaption>
+        REE entrega la marca con su desfase real y es inequ&iacute;voca. Open-Meteo no, y de
+        ah&iacute; sale todo: reinterpretar su etiqueta como hora de Madrid empareja cada
+        temperatura con la demanda de la hora siguiente.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="sec">
+    <h2>La API no se equivocaba</h2>
+
+    <div class="hallazgo">
+      <h3>Es coherente consigo misma; el error estaba en la lectura</h3>
+      <p>
+        Consultada en septiembre, Open-Meteo declara <code class="chip">utc_offset_seconds: 7200</code>
+        para el 1 de marzo. Madrid ese d&iacute;a est&aacute; en UTC+1, as&iacute; que el campo
+        parece un fallo de la API.
+      </p>
+      <p>
+        No lo es. <b>La API construye la serie aplicando el desfase que declara.</b> Que ese
+        desfase sea el vigente el d&iacute;a de la petici&oacute;n y no el del d&iacute;a de los
+        datos hace que las etiquetas no sean hora de Madrid &mdash; pero
+        <code class="chip">etiqueta &minus; utc_offset_seconds</code> da el UTC correcto siempre.
+      </p>
+      <p>
+        Comprobado pidiendo el mismo d&iacute;a dos veces, en <code class="chip">Europe/Madrid</code>
+        y en <code class="chip">UTC</code>, y contrastando contra la segunda:
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>D&iacute;a</th>
+              <th style="text-align:right">Desfase declarado</th>
+              <th style="text-align:right">Reinterpretando a Madrid</th>
+              <th style="text-align:right">Restando el campo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code class="chip">2024-03-01</code></td><td class="n">7200</td><td class="n">21 de 24 mal</td><td class="n">0 de 24</td></tr>
+            <tr><td><code class="chip">2024-01-15</code></td><td class="n">7200</td><td class="n">19 de 24 mal</td><td class="n">0 de 24</td></tr>
+            <tr><td><code class="chip">2024-07-15</code></td><td class="n">7200</td><td class="n">0 de 24</td><td class="n">0 de 24</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top:18px">
+        En julio coincide porque Madrid s&iacute; est&aacute; en UTC+2. <b>El error solo aparece en
+        invierno</b>, que es justo la mitad del a&ntilde;o en la que la temperatura m&aacute;s
+        explica la demanda.
+      </p>
+      <p>
+        La soluci&oacute;n no fue corregir el desfase aguas abajo, fue no tenerlo: la ingesta pide
+        <code class="chip">timezone=UTC</code> y la marca ya es un instante.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Las decisiones de esta fase</h2>
+
+    <div class="decisions">
+      <div class="dec">
+        <div class="mark">01</div>
+        <div>
+          <h3>Los datos se piden en UTC</h3>
+          <p>Sin huso que deducir aguas abajo. Como el d&iacute;a local de Madrid empieza a las 22:00 o 23:00 UTC de la v&iacute;spera, la petici&oacute;n cubre dos d&iacute;as UTC y la transformaci&oacute;n recorta la ventana.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">02</div>
+        <div>
+          <h3>El parseo rechaza lo que no venga en UTC</h3>
+          <p>Si <code class="chip">utc_offset_seconds</code> no es cero, el job revienta. El problema nunca fue equivocarse de huso: fue que equivocarse no produc&iacute;a ning&uacute;n s&iacute;ntoma.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">03</div>
+        <div>
+          <h3>Una sola traducci&oacute;n entre husos</h3>
+          <p><code class="chip">ventana_utc(dia)</code> devuelve el intervalo UTC del d&iacute;a local. Todo lo dem&aacute;s trabaja en UTC. De paso explica sola el d&iacute;a de 23 y 25 horas: es la longitud de la ventana, no un caso especial.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">04</div>
+        <div>
+          <h3>Desfase expl&iacute;cito, no zona de sesi&oacute;n</h3>
+          <p>La marca se parsea con un formato que lleva desfase, igual que la de REE. <code class="chip">to_timestamp</code> sobre una marca desnuda depende de <code class="chip">spark.sql.session.timeZone</code>, y esa es la clase de dependencia invisible que ya cost&oacute; una hora.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">05</div>
+        <div>
+          <h3>El cruce conserva los huecos</h3>
+          <p>Un <code class="chip">full outer</code>, no un <code class="chip">inner</code>. Si falta una hora en una fuente, la fila aparece con un nulo. Un <code class="chip">inner</code> habr&iacute;a dado una tabla m&aacute;s limpia y una mentira.</p>
+        </div>
+      </div>
+      <div class="dec">
+        <div class="mark">06</div>
+        <div>
+          <h3>Proyecci&oacute;n de particiones</h3>
+          <p>Ni crawler ni <code class="chip">MSCK REPAIR</code>. Athena deduce las particiones del patr&oacute;n de la ruta: coste cero y nada que mantener. Obliga a rutas predecibles, de ah&iacute; <code class="chip">mes=03</code> y no <code class="chip">mes=3</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Por qu&eacute; 28 tests en verde no lo vieron</h2>
+    <p class="sec-lead">
+      No fue mala suerte. La suite estaba construida de forma que no pod&iacute;a verlo.
+    </p>
+
+    <div class="hallazgo">
+      <h3>Comparar tu c&oacute;digo contra tu c&oacute;digo solo demuestra que eres consistente</h3>
+      <p>
+        La implementaci&oacute;n de referencia en Python y la de PySpark aplicaban <b>la misma
+        regla</b>. Si la regla es falsa, las dos fallan igual y el test sale verde. Hab&iacute;a
+        incluso un test llamado
+        <code class="chip">test_temperatura_usa_las_reglas_horarias_y_no_el_desfase_declarado</code>,
+        que codificaba la premisa equivocada y la proteg&iacute;a.
+      </p>
+      <p>
+        Ninguna comprobaci&oacute;n contrastaba la salida contra la fuente.
+      </p>
+      <p>
+        Lo que lo destap&oacute; no fue un test: fue mirar la tabla. La temperatura m&iacute;nima
+        sal&iacute;a a las <b>09:00</b>, m&aacute;s de una hora despu&eacute;s del amanecer del 1 de
+        marzo. Con el arreglo cae a las <b>08:00</b>, que es donde tiene que estar.
+      </p>
+      <p>
+        El test que faltaba ya existe:
+        <code class="chip">test_la_temperatura_no_va_corrida_respecto_a_la_fuente</code> lee el JSON
+        crudo y comprueba hora a hora que la temperatura que acaba en <em>curated</em> es la que la
+        fuente pone en ese instante. Se ha verificado que <b>falla</b> si se reintroduce la
+        conversi&oacute;n anterior.
+      </p>
+
+      <div class="cifras">
+        <div class="cifra"><div class="v">31</div><div class="k">tests en total</div></div>
+        <div class="cifra"><div class="v">26</div><div class="k">sin Spark, en milisegundos</div></div>
+        <div class="cifra"><div class="v">5</div><div class="k">con sesi&oacute;n de Spark real</div></div>
+      </div>
+
+      <p style="margin-top:18px">
+        Regla que queda para el resto del proyecto: <b>al menos una comprobaci&oacute;n por fuente
+        tiene que atarse al dato de origen</b>, no a otra implementaci&oacute;n propia.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>El primer d&iacute;a curado</h2>
+    <p class="sec-lead">1 de marzo de 2024, 24 filas, cero nulos, cero errores y cero avisos.</p>
+
+    <div class="tablewrap">
+      <table>
+        <caption>Horas seleccionadas, en hora local de Madrid.</caption>
+        <thead>
+          <tr>
+            <th>Hora local</th>
+            <th style="text-align:right">Demanda (MW)</th>
+            <th style="text-align:right">PVPC (&euro;/MWh)</th>
+            <th style="text-align:right">Spot (&euro;/MWh)</th>
+            <th style="text-align:right">Temp. (&deg;C)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="chip">08:00</code></td><td class="n">32.281</td><td class="n">72,40</td><td class="n">3,25</td><td class="n">2,1</td></tr>
+          <tr><td><code class="chip">10:00</code></td><td class="n">31.104</td><td class="n">117,96</td><td class="n">0,00</td><td class="n">5,5</td></tr>
+          <tr><td><code class="chip">13:00</code></td><td class="n">29.771</td><td class="n">115,92</td><td class="n">0,00</td><td class="n">11,3</td></tr>
+          <tr><td><code class="chip">16:00</code></td><td class="n">28.758</td><td class="n">68,03</td><td class="n">0,00</td><td class="n">12,2</td></tr>
+          <tr><td><code class="chip">20:00</code></td><td class="n">33.787</td><td class="n">127,87</td><td class="n">10,10</td><td class="n">8,4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hallazgo">
+      <h3>La curva que confirma que el desfase est&aacute; bien</h3>
+      <div class="cifras">
+        <div class="cifra"><div class="v">08:00</div><div class="k">m&iacute;nima, 2,1 &deg;C</div></div>
+        <div class="cifra"><div class="v">16:00</div><div class="k">m&aacute;xima, 12,2 &deg;C</div></div>
+        <div class="cifra"><div class="v">20:00</div><div class="k">pico de demanda, 33,8 GW</div></div>
+      </div>
+      <p style="margin-top:18px">
+        La m&iacute;nima al amanecer y la m&aacute;xima a media tarde. Si el desfase estuviera mal,
+        la curva saldr&iacute;a corrida y se ver&iacute;a a simple vista &mdash; que es exactamente
+        como se detect&oacute; el error.
+      </p>
+      <p>
+        Y ya asoma la pregunta del proyecto: de <b>10:00 a 16:00 el precio spot est&aacute; a
+        0,00 &euro;/MWh</b> mientras el PVPC va por encima de 115. La demanda hace pico a las 20:00,
+        cuando el spot ya ha vuelto a subir. Marzo de 2024 fue de viento r&eacute;cord en Espa&ntilde;a:
+        la relaci&oacute;n entre temperatura, consumo y precio no va a ser una recta.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Lo que sigue sin probarse</h2>
+    <p class="sec-lead">
+      El job no se ha ejecutado en Glue. Queda por confirmar lo que solo existe en AWS: que el
+      envoltorio de <code class="chip">awsglue</code> arranca, que el rol lee de <em>raw</em> y
+      escribe en <em>curated</em>, y que Athena encuentra las particiones por proyecci&oacute;n.
+      Antes hay que reingestar el 1 de marzo, porque el JSON que hay en <em>raw</em> est&aacute; en
+      hora local y el parseo nuevo lo rechaza. La ejecuci&oacute;n cuesta unos cuatro c&eacute;ntimos.
+    </p>
+  </section>
+
+  <div class="next">
+    <span><span class="brand">Caudal<span class="it">it</span></span> &middot; Fase 5 de 10 &middot; Transformaci&oacute;n</span>
+    <span>Siguiente: Athena &mdash; las queries que responden por fin la pregunta del proyecto</span>
+  </div>
+
+</div>
+
+</body>
+</html>

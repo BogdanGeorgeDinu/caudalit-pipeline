@@ -11,32 +11,50 @@ MADRID = ZoneInfo("Europe/Madrid")
 UTC = ZoneInfo("UTC")
 
 
+def ventana_utc(dia: date):
+    """(inicio, fin) en UTC del día local de Madrid.
+
+    El proyecto piensa en días locales —es lo que particiona la tabla y lo que
+    entiende quien mira el consumo— pero cruza las fuentes por instante UTC.
+    Esta función es la única traducción entre las dos ideas.
+
+    Intervalo semiabierto: `fin` ya pertenece al día siguiente.
+    """
+    inicio = datetime.combine(dia, datetime.min.time(), tzinfo=MADRID)
+    fin = datetime.combine(dia + timedelta(days=1), datetime.min.time(), tzinfo=MADRID)
+    return inicio.astimezone(UTC), fin.astimezone(UTC)
+
+
 def horas_esperadas(dia: date) -> int:
     """Horas reales que tiene un día en Madrid.
 
     23 el domingo que adelanta, 25 el que atrasa, 24 el resto. Validar contra
     24 fijo marca como incompletos dos días al año que están completos.
     """
-    inicio = datetime.combine(dia, datetime.min.time(), tzinfo=MADRID)
-    fin = datetime.combine(dia + timedelta(days=1), datetime.min.time(), tzinfo=MADRID)
-    return round((fin.astimezone(UTC) - inicio.astimezone(UTC)).total_seconds() / 3600)
+    inicio, fin = ventana_utc(dia)
+    return round((fin - inicio).total_seconds() / 3600)
 
 
 def hay_cambio_de_hora(dia: date) -> bool:
     return horas_esperadas(dia) != 24
 
 
-def local_a_utc(marca: str) -> datetime:
-    """Hora local de Madrid sin desfase -> instante UTC.
+def marca_utc(marca: str) -> datetime:
+    """Marca sin desfase de una fuente pedida en UTC -> instante UTC.
 
-    Open-Meteo entrega `2024-03-01T00:00` y, en otro campo, un
-    `utc_offset_seconds` que corresponde al día en que se hace la petición, no
-    al día de los datos. Usar ese campo desplaza una hora todo el invierno.
+    A Open-Meteo se le pide `timezone=UTC`, así que `2024-03-01T00:00` ya es un
+    instante y no hay ningún huso que deducir.
+
+    Se pedía en hora local hasta que se comprobó que la API construye la serie
+    con el desfase vigente el día de la petición, no el del día de los datos:
+    consultado en septiembre, un día de enero llega etiquetado en UTC+2.
+    Reinterpretar esas etiquetas como hora de Madrid corría todo el invierno
+    una hora sin que fallara nada. Pedir en UTC quita el problema en origen.
     """
     ingenua = datetime.fromisoformat(marca)
     if ingenua.tzinfo is not None:
         raise ValueError(f"se esperaba una marca sin desfase: {marca!r}")
-    return ingenua.replace(tzinfo=MADRID).astimezone(UTC)
+    return ingenua.replace(tzinfo=UTC)
 
 
 def desfasada_a_utc(marca: str) -> datetime:
@@ -49,25 +67,3 @@ def desfasada_a_utc(marca: str) -> datetime:
 
 def utc_a_local(instante: datetime) -> datetime:
     return instante.astimezone(MADRID)
-
-
-def calendario(dia: date):
-    """[(hora local sin desfase, instante UTC)] para todas las horas del día.
-
-    El job lo difunde como tabla y cruza por la cadena local, en vez de llamar
-    a `to_utc_timestamp`. Las reglas horarias quedan así en un sitio probado y
-    el resultado no depende de la versión de Spark ni de su configuración.
-
-    El domingo que atrasa, la hora local se repite: se conserva la primera
-    aparición, que es la que el parseo también conserva.
-    """
-    instante = datetime.combine(dia, datetime.min.time(), tzinfo=MADRID).astimezone(UTC)
-    fin = datetime.combine(dia + timedelta(days=1), datetime.min.time(), tzinfo=MADRID).astimezone(UTC)
-
-    vistas = {}
-    while instante < fin:
-        local = instante.astimezone(MADRID).strftime("%Y-%m-%dT%H:%M")
-        vistas.setdefault(local, instante)
-        instante += timedelta(hours=1)
-
-    return sorted(vistas.items(), key=lambda par: par[1])

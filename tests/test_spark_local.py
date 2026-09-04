@@ -68,7 +68,7 @@ class SparkContraReferencia(unittest.TestCase):
         return parseo.unir(
             parseo.demanda(cargar("ree_demanda")),
             parseo.precio(cargar("ree_precio")),
-            parseo.temperatura(cargar("clima_temperatura")),
+            parseo.temperatura(cargar("clima_temperatura"), DIA),
         )
 
     @staticmethod
@@ -106,13 +106,41 @@ class SparkContraReferencia(unittest.TestCase):
         self.assertEqual(self.informe["nulos_demanda_mw"], 0)
         self.assertEqual(self.informe["nulos_temperatura_c"], 0)
 
-    def test_el_desfase_horario_es_el_de_invierno(self):
-        """La medianoche local del 1 de marzo es 23:00 UTC del 29 de febrero.
-
-        Si se hubiera usado el utc_offset_seconds de Open-Meteo, seria 22:00.
-        """
+    def test_el_dia_empieza_donde_empieza_el_dia_local(self):
+        """La medianoche local del 1 de marzo es 23:00 UTC del 29 de febrero."""
         primera = self._marcas(self.filas).orderBy("momento_utc").first()
         self.assertEqual(primera["marca"], "2024-02-29 23:00:00")
+
+    def test_la_temperatura_no_va_corrida_respecto_a_la_fuente(self):
+        """El test que le faltaba a la fase: contrastar contra el JSON crudo.
+
+        La suite comparaba Spark contra la referencia en Python, y las dos
+        aplicaban la misma regla equivocada, asi que salia verde con el dato
+        desplazado una hora. Esto compara contra lo que dice la fuente.
+
+        Open-Meteo se pide con timezone=UTC, de modo que la etiqueta del
+        payload es directamente el instante que debe aparecer en curated.
+        """
+        import json
+
+        ruta = (
+            DATOS / "fuente=clima_temperatura" / f"anio={DIA.year:04d}"
+            / f"mes={DIA.month:02d}" / f"dia={DIA.day:02d}" / "datos.json"
+        )
+        crudo = json.loads(ruta.read_text(encoding="utf-8"))
+        self.assertEqual(crudo["utc_offset_seconds"], 0, "el fichero de ejemplo no esta en UTC")
+
+        origen = dict(zip(crudo["hourly"]["time"], crudo["hourly"]["temperature_2m"]))
+        obtenidas = {
+            r["marca"]: r["temperatura_c"] for r in self._marcas(self.filas).collect()
+        }
+
+        for marca, temperatura in obtenidas.items():
+            etiqueta = marca.replace(" ", "T")[:16]
+            self.assertAlmostEqual(
+                temperatura, origen[etiqueta], places=6,
+                msg=f"{marca} deberia traer la temperatura que la fuente pone en {etiqueta}",
+            )
 
     def test_escribe_parquet_con_particiones_de_dos_digitos(self):
         destino = tempfile.mkdtemp(prefix="curated-")

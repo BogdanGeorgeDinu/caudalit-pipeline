@@ -29,27 +29,37 @@ class Tiempo(unittest.TestCase):
     def test_domingo_que_atrasa_tiene_25(self):
         self.assertEqual(tiempo.horas_esperadas(date(2024, 10, 27)), 25)
 
-    def test_invierno_va_una_hora_por_delante_de_utc(self):
-        self.assertEqual(tiempo.local_a_utc("2024-03-01T00:00"), utc(2024, 2, 29, 23, 0))
+    def test_el_dia_local_de_invierno_empieza_a_las_23_utc(self):
+        self.assertEqual(
+            tiempo.ventana_utc(date(2024, 3, 1)),
+            (utc(2024, 2, 29, 23, 0), utc(2024, 3, 1, 23, 0)),
+        )
 
-    def test_verano_va_dos_horas_por_delante_de_utc(self):
-        self.assertEqual(tiempo.local_a_utc("2024-07-15T00:00"), utc(2024, 7, 14, 22, 0))
+    def test_el_dia_local_de_verano_empieza_a_las_22_utc(self):
+        self.assertEqual(
+            tiempo.ventana_utc(date(2024, 7, 15)),
+            (utc(2024, 7, 14, 22, 0), utc(2024, 7, 15, 22, 0)),
+        )
+
+    def test_la_marca_de_open_meteo_ya_es_utc(self):
+        """Se pide con `timezone=UTC`: no hay huso que deducir.
+
+        La primera versión pedía en Europe/Madrid y reinterpretaba la etiqueta
+        como hora local. La API construye la serie con el desfase vigente el
+        día de la petición, así que en invierno eso corría el dato una hora.
+        """
+        self.assertEqual(tiempo.marca_utc("2024-03-01T00:00"), utc(2024, 3, 1, 0, 0))
 
     def test_las_dos_fuentes_convergen_en_el_mismo_instante(self):
-        """El caso que justifica todo el módulo.
-
-        Si se usara el `utc_offset_seconds` de Open-Meteo, que en la respuesta
-        del 1 de marzo vale 7200, esta igualdad fallaría por una hora y el
-        cruce emparejaría cada temperatura con la demanda equivocada.
-        """
+        """La medianoche local del 1 de marzo, vista por las dos fuentes."""
         self.assertEqual(
-            tiempo.local_a_utc("2024-03-01T00:00"),
+            tiempo.marca_utc("2024-02-29T23:00"),
             tiempo.desfasada_a_utc("2024-03-01T00:00:00.000+01:00"),
         )
 
     def test_rechaza_marca_con_desfase_donde_no_toca(self):
         with self.assertRaises(ValueError):
-            tiempo.local_a_utc("2024-03-01T00:00:00+01:00")
+            tiempo.marca_utc("2024-03-01T00:00:00+01:00")
 
     def test_rechaza_marca_sin_desfase_donde_hace_falta(self):
         with self.assertRaises(ValueError):
@@ -112,28 +122,46 @@ class Parseo(unittest.TestCase):
         filas = parseo.precio(payload)
         self.assertIsNone(filas[0]["precio_spot_eur_mwh"])
 
-    def test_temperatura_usa_las_reglas_horarias_y_no_el_desfase_declarado(self):
+    def test_temperatura_toma_la_marca_como_instante_utc(self):
         payload = {
-            "utc_offset_seconds": 7200,  # el que devuelve la API, incorrecto para marzo
-            "hourly": {"time": ["2024-03-01T00:00"], "temperature_2m": [5.8]},
+            "utc_offset_seconds": 0,
+            "hourly": {"time": ["2024-02-29T23:00"], "temperature_2m": [5.8]},
         }
-        filas = parseo.temperatura(payload)
+        filas = parseo.temperatura(payload, date(2024, 3, 1))
         self.assertEqual(filas[0]["momento_utc"], utc(2024, 2, 29, 23, 0))
 
-    def test_temperatura_rechaza_arrays_descuadrados(self):
-        payload = {"hourly": {"time": ["2024-03-01T00:00", "2024-03-01T01:00"], "temperature_2m": [5.8]}}
-        with self.assertRaises(ValueError):
-            parseo.temperatura(payload)
+    def test_temperatura_rechaza_un_payload_en_hora_local(self):
+        """El fallo en alto que le faltaba a la primera versión de la fase.
 
-    def test_la_hora_repetida_de_octubre_no_duplica_filas(self):
+        Con `utc_offset_seconds` distinto de cero las marcas no son instantes,
+        y darlas por buenas desplaza el dato una hora sin romper nada.
+        """
         payload = {
-            "hourly": {
-                "time": ["2024-10-27T02:00", "2024-10-27T02:00"],
-                "temperature_2m": [14.0, 13.5],
-            }
+            "utc_offset_seconds": 7200,
+            "hourly": {"time": ["2024-03-01T00:00"], "temperature_2m": [5.8]},
         }
-        filas = parseo.temperatura(payload)
-        self.assertEqual(len(filas), 1)
+        with self.assertRaises(ValueError):
+            parseo.temperatura(payload, date(2024, 3, 1))
+
+    def test_temperatura_recorta_a_la_ventana_del_dia_local(self):
+        """El payload trae dos días UTC; sólo entra el día local de Madrid."""
+        payload = {
+            "utc_offset_seconds": 0,
+            "hourly": {
+                "time": ["2024-02-29T22:00", "2024-02-29T23:00", "2024-03-01T23:00"],
+                "temperature_2m": [4.0, 5.8, 6.3],
+            },
+        }
+        filas = parseo.temperatura(payload, date(2024, 3, 1))
+        self.assertEqual([f["momento_utc"] for f in filas], [utc(2024, 2, 29, 23, 0)])
+
+    def test_temperatura_rechaza_arrays_descuadrados(self):
+        payload = {
+            "utc_offset_seconds": 0,
+            "hourly": {"time": ["2024-03-01T00:00", "2024-03-01T01:00"], "temperature_2m": [5.8]},
+        }
+        with self.assertRaises(ValueError):
+            parseo.temperatura(payload, date(2024, 3, 1))
 
     def test_unir_conserva_las_horas_aunque_falte_una_fuente(self):
         filas = parseo.unir(

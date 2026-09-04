@@ -7,7 +7,7 @@ de DataFrame.
 
 from datetime import date
 
-from tiempo import desfasada_a_utc, local_a_utc
+from tiempo import desfasada_a_utc, marca_utc, ventana_utc
 
 SERIE_PVPC = "PVPC"
 SERIE_SPOT = "Precio mercado spot"
@@ -54,11 +54,21 @@ def precio(payload):
     ]
 
 
-def temperatura(payload):
+def temperatura(payload, dia):
     """[{momento_utc, temperatura_c}] a partir del JSON de Open-Meteo.
 
-    Se ignora `utc_offset_seconds` a propósito: ver tiempo.local_a_utc.
+    La ingesta pide `timezone=UTC`, así que las marcas ya son instantes. Se
+    comprueba en vez de darlo por hecho: si algún día el payload vuelve a
+    llegar en hora local, esto tiene que fallar en alto. Es justo el fallo
+    silencioso que costó la primera versión de esta fase.
+
+    El payload trae dos días UTC porque el día local de Madrid empieza a las
+    22:00 o 23:00 UTC de la víspera; aquí se recorta a la ventana del día.
     """
+    desfase = payload.get("utc_offset_seconds")
+    if desfase != 0:
+        raise ValueError(f"se esperaba el payload en UTC; llegó utc_offset_seconds={desfase!r}")
+
     horario = payload.get("hourly", {})
     marcas = horario.get("time", [])
     grados = horario.get("temperature_2m", [])
@@ -66,12 +76,12 @@ def temperatura(payload):
     if len(marcas) != len(grados):
         raise ValueError(f"time y temperature_2m no cuadran: {len(marcas)} vs {len(grados)}")
 
-    filas = {}
-    for marca, grado in zip(marcas, grados):
-        # El domingo que atrasa, la hora local se repite y las dos entradas
-        # caen en el mismo instante UTC. Sin desambiguador en el payload, se
-        # conserva la primera y la validación lo cuenta como hueco.
-        filas.setdefault(local_a_utc(marca), _numero(grado))
+    inicio, fin = ventana_utc(dia)
+    filas = {
+        instante: _numero(grado)
+        for instante, grado in ((marca_utc(m), g) for m, g in zip(marcas, grados))
+        if inicio <= instante < fin
+    }
 
     return [{"momento_utc": k, "temperatura_c": v} for k, v in sorted(filas.items())]
 

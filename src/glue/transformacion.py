@@ -7,12 +7,12 @@ local de Spark, que es lo que permite probarla.
 import json
 
 from pyspark.sql import functions as F
-from pyspark.sql.types import StringType, StructField, StructType, TimestampType
 
 from calidad import COLUMNAS, DEMANDA_MAX_MW, DEMANDA_MIN_MW, TEMPERATURA_MAX_C, TEMPERATURA_MIN_C
-from tiempo import calendario, horas_esperadas
+from tiempo import horas_esperadas, ventana_utc
 
 FORMATO_REE = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+FORMATO_OPENMETEO = "yyyy-MM-dd'T'HH:mmXXX"
 FUENTES = ("ree_demanda", "ree_precio", "clima_temperatura")
 
 
@@ -66,34 +66,30 @@ def tabla_precio(df):
     return pvpc.join(spot, on="momento_utc", how="full_outer")
 
 
-def tabla_temperatura(spark, df, dia):
-    """Open-Meteo entrega hora local sin desfase.
+def tabla_temperatura(df, dia):
+    """Open-Meteo se pide en UTC: la marca ya es un instante.
 
-    Se cruza contra el calendario del día en vez de convertir con
-    `to_utc_timestamp`: las reglas quedan en `tiempo.calendario`, que está
-    probado, y el resultado no depende de la configuración de Spark.
+    Se le pega una `Z` y se parsea con un formato que lleva desfase, igual que
+    la marca de REE. Así el resultado no depende de `spark.sql.session.timeZone`,
+    que es la clase de dependencia invisible que ya costó un desfase de una hora.
+
+    El payload cubre dos días UTC porque el día local de Madrid empieza en la
+    víspera; el filtro recorta la ventana y sustituye al `inner join` contra el
+    calendario que hacía antes de dos cosas a la vez.
     """
-    esquema = StructType(
-        [
-            StructField("hora_local", StringType(), False),
-            StructField("momento_utc", TimestampType(), False),
-        ]
-    )
-    cal = spark.createDataFrame(calendario(dia), schema=esquema)
+    inicio, fin = ventana_utc(dia)
 
-    horas = (
+    return (
         df.select(F.arrays_zip("hourly.time", "hourly.temperature_2m").alias("pares"))
         .select(F.explode("pares").alias("p"))
         .select(
-            F.col("p.time").alias("hora_local"),
+            F.to_timestamp(F.concat(F.col("p.time"), F.lit("Z")), FORMATO_OPENMETEO).alias(
+                "momento_utc"
+            ),
             F.col("p.temperature_2m").cast("double").alias("temperatura_c"),
         )
-    )
-
-    return (
-        horas.join(F.broadcast(cal), on="hora_local", how="inner")
-        .groupBy("momento_utc")
-        .agg(F.first("temperatura_c", ignorenulls=True).alias("temperatura_c"))
+        .where(F.col("momento_utc").isNotNull())
+        .where((F.col("momento_utc") >= F.lit(inicio)) & (F.col("momento_utc") < F.lit(fin)))
     )
 
 
@@ -174,7 +170,7 @@ def transformar(spark, base_raw, dia):
     filas = cruzar(
         tabla_demanda(crudos["ree_demanda"]) if crudos["ree_demanda"] is not None else None,
         tabla_precio(crudos["ree_precio"]) if crudos["ree_precio"] is not None else None,
-        tabla_temperatura(spark, crudos["clima_temperatura"], dia)
+        tabla_temperatura(crudos["clima_temperatura"], dia)
         if crudos["clima_temperatura"] is not None
         else None,
     )

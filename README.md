@@ -78,7 +78,7 @@ Se descartó **ESIOS** deliberadamente: ofrece los mismos datos pero exige un to
 | 2 | [Repositorio y estructura](docs/fase-2-repositorio/) | Cerrada |
 | 3 | [Terraform: backend, S3, IAM, Glue DB, Athena](docs/fase-3-terraform/) | Cerrada |
 | 4 | [Ingesta: Lambdas con reintentos](docs/fase-4-ingesta/) | Cerrada |
-| 5 | Transformación: Glue + PySpark | Pendiente |
+| 5 | Transformación: Glue + PySpark | En curso |
 | 6 | Consulta: Athena | Pendiente |
 | 7 | Orquestación: Step Functions | Pendiente |
 | 8 | CI/CD: GitHub Actions | Pendiente |
