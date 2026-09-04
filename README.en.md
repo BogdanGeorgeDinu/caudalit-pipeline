@@ -80,7 +80,7 @@ Both **public and token-free**. Verified before anything was designed.
 | 2 | [Repository and structure](docs/fase-2-repositorio/) | Done |
 | 3 | [Terraform: backend, S3, IAM, Glue DB, Athena](docs/fase-3-terraform/) | Done |
 | 4 | [Ingestion: Lambdas with retries](docs/fase-4-ingesta/) | Done |
-| 5 | Transformation: Glue + PySpark | Pending |
+| 5 | Transformation: Glue + PySpark | In progress |
 | 6 | Query: Athena | Pending |
 | 7 | Orchestration: Step Functions | Pending |
 | 8 | CI/CD: GitHub Actions | Pending |
@@ -100,24 +100,49 @@ Live status: **[caudalit.com/proyecto](https://caudalit.com/proyecto/)**
 ├── src/
 │   ├── lambdas/       REE and Open-Meteo ingestion
 │   └── glue/          PySpark jobs, raw → curated
+├── tests/             69 tests; 18 spin up a local Spark session
+├── herramientas/      diagnostics, no Spark and no AWS needed
 ├── athena/            queries answering the business question
 └── docs/              one folder per phase: diagram, PDF and decisions
 ```
 
 ## Running it
 
-> [!NOTE]
-> Infrastructure arrives in **Phase 3**. Until then this repository holds the
-> architecture and the decisions, not deployable resources.
-
-Requirements: Terraform ≥ 1.10, AWS CLI configured, Python 3.12.
+Requirements: Terraform ≥ 1.10, AWS CLI configured, Python 3.11 or 3.12.
 
 ```bash
 # 1. Create the remote state bucket (once)
 cd terraform/bootstrap && terraform init && terraform apply
 
 # 2. Deploy the rest
-cd .. && terraform init && terraform plan
+cd .. && terraform init -backend-config=backend.hcl && terraform plan
+```
+
+## Tests
+
+Both the transformation and the ingestion logic are tested **without AWS and without
+network access**. The Spark ones skip themselves when PySpark is missing, so the suite
+never depends on having Spark installed.
+
+```bash
+# 51 tests in milliseconds, no dependencies
+python3 -m unittest discover -s tests
+
+# The remaining 18, on a local Spark session
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PYSPARK_PYTHON=$PWD/tests/venv/bin/python
+export PYSPARK_DRIVER_PYTHON=$PYSPARK_PYTHON
+tests/venv/bin/python -m unittest discover -s tests
+```
+
+Two diagnostic tools, neither of which needs AWS:
+
+```bash
+# Join and validate a day of raw data, with its quality report
+python3 herramientas/revisar_dia.py tests/datos 2024-10-27
+
+# Check against Open-Meteo that the hourly alignment still holds
+python3 herramientas/comprobar_desfase.py
 ```
 
 ## Cost

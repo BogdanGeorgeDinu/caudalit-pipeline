@@ -98,24 +98,49 @@ Estado en vivo: **[caudalit.com/proyecto](https://caudalit.com/proyecto/)**
 ├── src/
 │   ├── lambdas/       ingesta REE y Open-Meteo
 │   └── glue/          jobs PySpark raw → curated
+├── tests/             69 pruebas; 18 levantan una sesión local de Spark
+├── herramientas/      diagnóstico sin Spark y sin AWS
 ├── athena/            consultas que responden la pregunta de negocio
 └── docs/              una carpeta por fase: diagrama, PDF y decisiones
 ```
 
 ## Cómo ejecutarlo
 
-> [!NOTE]
-> La infraestructura llega en la **Fase 3**. Hasta entonces este repositorio contiene
-> la arquitectura y las decisiones, no recursos desplegables.
-
-Requisitos: Terraform ≥ 1.10, AWS CLI configurada, Python 3.12.
+Requisitos: Terraform ≥ 1.10, AWS CLI configurada, Python 3.11 o 3.12.
 
 ```bash
 # 1. Crear el bucket de estado remoto (una sola vez)
 cd terraform/bootstrap && terraform init && terraform apply
 
 # 2. Desplegar el resto
-cd .. && terraform init && terraform plan
+cd .. && terraform init -backend-config=backend.hcl && terraform plan
+```
+
+## Pruebas
+
+La lógica de transformación y la de ingesta se prueban **sin AWS y sin red**. Las de
+Spark se saltan solas si PySpark no está instalado, para que la suite no dependa de
+tener un Spark en la máquina.
+
+```bash
+# 51 pruebas en milisegundos, sin dependencias
+python3 -m unittest discover -s tests
+
+# Las 18 restantes, con una sesión local de Spark
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PYSPARK_PYTHON=$PWD/tests/venv/bin/python
+export PYSPARK_DRIVER_PYTHON=$PYSPARK_PYTHON
+tests/venv/bin/python -m unittest discover -s tests
+```
+
+Dos herramientas de diagnóstico, ninguna necesita AWS:
+
+```bash
+# Cruza y valida un día de datos crudos, con su informe de calidad
+python3 herramientas/revisar_dia.py tests/datos 2024-10-27
+
+# Comprueba contra Open-Meteo que la alineación horaria sigue siendo correcta
+python3 herramientas/comprobar_desfase.py
 ```
 
 ## Coste
