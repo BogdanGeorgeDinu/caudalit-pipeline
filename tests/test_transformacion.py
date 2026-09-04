@@ -222,10 +222,32 @@ class Calidad(unittest.TestCase):
         informe = calidad.revisar([self._fila(h, demanda_mw=None) for h in range(24)], date(2024, 3, 1))
         self.assertFalse(informe.valido)
 
-    def test_temperatura_vacia_no_invalida_el_dia(self):
+    def test_temperatura_vacia_no_invalida_el_dia_pero_avisa(self):
+        """La demanda responde la pregunta de negocio; la temperatura no.
+
+        Un dia sin temperatura queda cojo, no inutil: se escribe y se anota.
+        Antes solo se contaban los nulos y el aviso no llegaba a emitirse,
+        aunque la documentacion de la fase decia que si.
+        """
         informe = calidad.revisar([self._fila(h, temperatura_c=None) for h in range(24)], date(2024, 3, 1))
         self.assertTrue(informe.valido)
         self.assertEqual(informe.nulos["temperatura_c"], 24)
+        self.assertIn("temperatura_c: 24 nulos", informe.avisos)
+
+    def test_un_hueco_suelto_de_precio_es_aviso(self):
+        filas = [self._fila(h) for h in range(24)]
+        filas[7]["precio_spot_eur_mwh"] = None
+        informe = calidad.revisar(filas, date(2024, 3, 1))
+        self.assertTrue(informe.valido)
+        self.assertEqual(informe.avisos, ["precio_spot_eur_mwh: 1 nulos"])
+
+    def test_la_demanda_incompleta_no_es_error_si_no_esta_toda_vacia(self):
+        """Solo la demanda completamente vacia tumba el dia."""
+        filas = [self._fila(h) for h in range(24)]
+        filas[3]["demanda_mw"] = None
+        informe = calidad.revisar(filas, date(2024, 3, 1))
+        self.assertTrue(informe.valido)
+        self.assertEqual(informe.avisos, [])
 
 
 if __name__ == "__main__":

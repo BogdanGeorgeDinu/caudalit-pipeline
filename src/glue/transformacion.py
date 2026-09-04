@@ -8,7 +8,7 @@ import json
 
 from pyspark.sql import functions as F
 
-from calidad import COLUMNAS, DEMANDA_MAX_MW, DEMANDA_MIN_MW, TEMPERATURA_MAX_C, TEMPERATURA_MIN_C
+from calidad import COLUMNAS, RANGOS, veredicto
 from tiempo import horas_esperadas, ventana_utc
 
 FORMATO_REE = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
@@ -113,38 +113,36 @@ def completar_columnas(filas):
 
 
 def revisar(filas, dia):
-    """Mismas reglas que `calidad.revisar`, evaluadas sobre el DataFrame."""
+    """Cuenta con agregados de Spark y delega el juicio en `calidad.veredicto`.
+
+    Las reglas viven en un solo sitio a proposito. Tenerlas escritas dos veces
+    —una aqui y otra en la referencia de Python— es como se colo el desfase
+    horario de esta fase: dos implementaciones que coinciden entre si no
+    demuestran que ninguna acierte.
+    """
     agregados = (
         filas.agg(
             F.count("*").alias("filas"),
             F.countDistinct("momento_utc").alias("instantes"),
             *[F.sum(F.col(c).isNull().cast("int")).alias(f"nulos_{c}") for c in COLUMNAS],
-            F.sum(
-                ((F.col("demanda_mw") < DEMANDA_MIN_MW) | (F.col("demanda_mw") > DEMANDA_MAX_MW)).cast("int")
-            ).alias("demanda_fuera_rango"),
-            F.sum(
-                ((F.col("temperatura_c") < TEMPERATURA_MIN_C) | (F.col("temperatura_c") > TEMPERATURA_MAX_C)).cast("int")
-            ).alias("temperatura_fuera_rango"),
+            *[
+                F.sum(
+                    ((F.col(c) < minimo) | (F.col(c) > maximo)).cast("int")
+                ).alias(f"fuera_{c}")
+                for c, (minimo, maximo) in RANGOS.items()
+            ],
         )
         .collect()[0]
         .asDict()
     )
 
     esperadas = horas_esperadas(dia)
-    errores, avisos = [], []
+    nulos = {c: agregados[f"nulos_{c}"] or 0 for c in COLUMNAS}
+    fuera = {c: agregados[f"fuera_{c}"] or 0 for c in RANGOS}
 
-    if agregados["filas"] == 0:
-        errores.append("sin filas")
-    if agregados["filas"] != agregados["instantes"]:
-        errores.append("instantes duplicados")
-    if agregados["filas"] and agregados["nulos_demanda_mw"] == agregados["filas"]:
-        errores.append("demanda_mw completamente vacia")
-    for columna in ("demanda", "temperatura"):
-        fuera = agregados[f"{columna}_fuera_rango"]
-        if fuera:
-            errores.append(f"{columna}: {fuera} valores fuera de rango")
-    if agregados["filas"] != esperadas:
-        avisos.append(f"{agregados['filas']} filas frente a {esperadas} esperadas")
+    errores, avisos = veredicto(
+        agregados["filas"], esperadas, agregados["instantes"], nulos, fuera
+    )
 
     return {**agregados, "filas_esperadas": esperadas, "errores": errores, "avisos": avisos}
 

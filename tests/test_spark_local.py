@@ -257,3 +257,99 @@ def tearDownModule():
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipIf(SparkSession is None, "pyspark no instalado")
+class ReglasDeCalidadCoincidenEnLosDosCaminos(unittest.TestCase):
+    """Spark y la referencia en Python deben emitir el mismo veredicto.
+
+    Aqui comparar las dos implementaciones SI es valido, al reves que con la
+    conversion horaria: las reglas de calidad son una especificacion propia, no
+    un hecho externo. `calidad.revisar` esta probado contra valores esperados
+    en test_transformacion, y esto comprueba que el camino de Spark no se
+    desvia de el. Las dos cuentan por medios distintos —agregados frente a
+    recorrer listas— y redactan el veredicto con la misma funcion.
+    """
+
+    ESQUEMA = "momento_utc timestamp, demanda_mw double, precio_pvpc_eur_mwh double, precio_spot_eur_mwh double, temperatura_c double"
+
+    @classmethod
+    def setUpClass(cls):
+        import calidad
+        import transformacion
+
+        cls.calidad = calidad
+        cls.transformacion = transformacion
+
+    def _dia(self, filas):
+        from datetime import datetime, timezone
+
+        base = datetime(2024, 3, 1, 0, 0, tzinfo=timezone.utc)
+        return [
+            {
+                "momento_utc": base.replace(hour=h % 24),
+                "demanda_mw": 25000.0,
+                "precio_pvpc_eur_mwh": 80.0,
+                "precio_spot_eur_mwh": 2.0,
+                "temperatura_c": 7.0,
+            }
+            for h in range(filas)
+        ]
+
+    def _comparar(self, filas, nombre):
+        from datetime import date
+
+        dia = date(2024, 3, 1)
+        esperado = self.calidad.revisar(filas, dia)
+
+        df = sesion().createDataFrame(
+            [tuple(f[c] for c in ("momento_utc", *self.calidad.COLUMNAS)) for f in filas],
+            schema=self.ESQUEMA,
+        )
+        obtenido = self.transformacion.revisar(df, dia)
+
+        self.assertEqual(sorted(obtenido["errores"]), sorted(esperado.errores), f"errores · {nombre}")
+        self.assertEqual(sorted(obtenido["avisos"]), sorted(esperado.avisos), f"avisos · {nombre}")
+        self.assertEqual(obtenido["filas"], esperado.filas, f"filas · {nombre}")
+
+    def test_dia_completo(self):
+        self._comparar(self._dia(24), "dia completo")
+
+    def test_faltan_horas(self):
+        self._comparar(self._dia(21), "faltan tres horas")
+
+    def test_instante_duplicado(self):
+        filas = self._dia(24)
+        filas.append(dict(filas[5]))
+        self._comparar(filas, "un instante duplicado")
+
+    def test_demanda_completamente_vacia(self):
+        filas = self._dia(24)
+        for f in filas:
+            f["demanda_mw"] = None
+        self._comparar(filas, "demanda toda vacia")
+
+    def test_demanda_fuera_de_rango(self):
+        filas = self._dia(24)
+        filas[3]["demanda_mw"] = 999.0
+        filas[7]["demanda_mw"] = 99999.0
+        self._comparar(filas, "demanda fuera de rango")
+
+    def test_temperatura_fuera_de_rango(self):
+        filas = self._dia(24)
+        filas[2]["temperatura_c"] = -80.0
+        self._comparar(filas, "temperatura fuera de rango")
+
+    def test_nulos_en_columnas_que_no_son_la_demanda(self):
+        filas = self._dia(24)
+        for f in filas[:4]:
+            f["temperatura_c"] = None
+        filas[9]["precio_spot_eur_mwh"] = None
+        self._comparar(filas, "nulos sueltos")
+
+    def test_varios_problemas_a_la_vez(self):
+        filas = self._dia(20)
+        filas.append(dict(filas[0]))
+        filas[1]["temperatura_c"] = None
+        filas[2]["demanda_mw"] = 60000.0
+        self._comparar(filas, "varios problemas")

@@ -115,6 +115,18 @@ Sirven para detectar una unidad cambiada o un valor centinela, no para juzgar la
 Conviene ser honesto sobre su alcance: ninguna de estas reglas habría detectado el
 desfase de una hora. Un dato corrido sigue estando dentro de rango.
 
+**Las reglas viven en un solo sitio.** `calidad.veredicto` recibe los números ya
+contados y emite el juicio; la transformación en Spark los cuenta con agregados y la
+referencia en Python recorriendo listas, pero ninguna de las dos redacta su propia
+versión. Estaban duplicadas y ya habían empezado a separarse: Spark decía
+`instantes duplicados` sin el número y `demanda: N valores fuera de rango` con otro
+nombre de columna, y en un día vacío emitía un aviso de más. Nada de eso corrompía
+datos, pero hacía que el log del job dijera cosas distintas de las que decía la
+herramienta local para el mismo día.
+
+De paso se arregló una regla documentada que no estaba implementada: los nulos en
+columnas que no son la demanda ahora sí generan aviso, en vez de solo contarse.
+
 ### 7. Proyección de particiones en vez de crawler o MSCK REPAIR
 Athena necesita saber qué particiones existen. Las dos formas habituales son un
 crawler de Glue o ejecutar `MSCK REPAIR TABLE` tras cada escritura.
@@ -197,6 +209,7 @@ los ficheros reales del 1 de marzo de 2024, y además contra el JSON crudo.
 | La medianoche local del 1 de marzo cae en 23:00 UTC | correcto |
 | El payload de dos días UTC se recorta a la ventana local | correcto |
 | Un payload en hora local se rechaza en alto | correcto |
+| Spark y la referencia emiten el mismo veredicto de calidad | correcto |
 | Día completo: 24 filas, cero nulos, cero errores, cero avisos | correcto |
 | El parquet se escribe en `anio=2024/mes=03/dia=01` | correcto |
 | Al releerlo salen 24 filas con `momento_local` | correcto |
@@ -221,7 +234,7 @@ Esto último **la ingesta anterior no podía hacerlo**. Pidiendo la temperatura 
 segundo fallo silencioso, independiente del desfase de invierno, que el cambio a UTC
 arregla de paso.
 
-Son **45 tests**: 35 sin Spark, que corren en milisegundos, y 10 que levantan una
+Son **55 tests**: 37 sin Spark, que corren en milisegundos, y 18 que levantan una
 sesión local. Los de Spark se saltan solos si PySpark no está instalado.
 
 ## Lo que sigue sin probarse
@@ -243,7 +256,7 @@ Esa ejecución cuesta unos cuatro céntimos.
 ## Cómo se ejecutan las pruebas
 
 ```bash
-# Rapido, sin Spark: 35 tests en milisegundos
+# Rapido, sin Spark: 37 tests en milisegundos
 python3 -m unittest discover -s tests
 
 # Completo, con Spark local

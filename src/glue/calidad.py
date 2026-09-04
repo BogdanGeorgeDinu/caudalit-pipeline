@@ -18,6 +18,47 @@ TEMPERATURA_MAX_C = 50.0
 
 COLUMNAS = ("demanda_mw", "precio_pvpc_eur_mwh", "precio_spot_eur_mwh", "temperatura_c")
 
+# Columnas con rango de plausibilidad, y su rango.
+RANGOS = {
+    "demanda_mw": (DEMANDA_MIN_MW, DEMANDA_MAX_MW),
+    "temperatura_c": (TEMPERATURA_MIN_C, TEMPERATURA_MAX_C),
+}
+
+
+def veredicto(filas, esperadas, instantes_distintos, nulos, fuera_de_rango):
+    """Las reglas, en un solo sitio, a partir de numeros ya contados.
+
+    La transformacion en Spark cuenta con agregados y la referencia en Python
+    recorriendo listas, pero el juicio se emite aqui. Tener las reglas dos
+    veces era como se colo el desfase horario de esta fase: dos
+    implementaciones que coinciden entre si no demuestran nada.
+    """
+    errores, avisos = [], []
+
+    if not filas:
+        return ["sin filas"], []
+
+    duplicados = filas - instantes_distintos
+    if duplicados:
+        errores.append(f"{duplicados} instantes duplicados")
+
+    if nulos.get("demanda_mw", 0) == filas:
+        errores.append("demanda_mw completamente vacia")
+
+    for columna in RANGOS:
+        fuera = fuera_de_rango.get(columna, 0)
+        if fuera:
+            errores.append(f"{columna}: {fuera} valores fuera de rango")
+
+    if filas != esperadas:
+        avisos.append(f"{filas} filas frente a {esperadas} esperadas")
+
+    for columna, vacios in nulos.items():
+        if columna != "demanda_mw" and vacios:
+            avisos.append(f"{columna}: {vacios} nulos")
+
+    return errores, avisos
+
 
 @dataclass
 class Informe:
@@ -48,36 +89,18 @@ def revisar(filas, dia: date) -> Informe:
     esperadas = horas_esperadas(dia)
     informe = Informe(dia=dia, filas=len(filas), filas_esperadas=esperadas)
 
-    if not filas:
-        informe.errores.append("sin filas")
-        return informe
-
-    instantes = [f["momento_utc"] for f in filas]
-    duplicados = len(instantes) - len(set(instantes))
-    if duplicados:
-        informe.errores.append(f"{duplicados} instantes duplicados")
-
-    if len(filas) != esperadas:
-        informe.avisos.append(f"{len(filas)} filas frente a {esperadas} esperadas")
-
-    for columna in COLUMNAS:
-        vacios = sum(1 for f in filas if f.get(columna) is None)
-        informe.nulos[columna] = vacios
-
-    # La demanda es la columna que responde la pregunta de negocio: sin ella
-    # el día no sirve, y es un error, no un aviso.
-    if informe.nulos["demanda_mw"] == len(filas):
-        informe.errores.append("demanda_mw completamente vacia")
-
-    _rango(informe, filas, "demanda_mw", DEMANDA_MIN_MW, DEMANDA_MAX_MW)
-    _rango(informe, filas, "temperatura_c", TEMPERATURA_MIN_C, TEMPERATURA_MAX_C)
-
-    return informe
-
-
-def _rango(informe, filas, columna, minimo, maximo):
-    fuera = [f[columna] for f in filas if f.get(columna) is not None and not minimo <= f[columna] <= maximo]
-    if fuera:
-        informe.errores.append(
-            f"{columna}: {len(fuera)} valores fuera de [{minimo}, {maximo}] (ej. {fuera[0]})"
+    informe.nulos = {c: sum(1 for f in filas if f.get(c) is None) for c in COLUMNAS}
+    fuera = {
+        c: sum(
+            1
+            for f in filas
+            if f.get(c) is not None and not minimo <= f[c] <= maximo
         )
+        for c, (minimo, maximo) in RANGOS.items()
+    }
+    instantes = len({f["momento_utc"] for f in filas})
+
+    informe.errores, informe.avisos = veredicto(
+        len(filas), esperadas, instantes, informe.nulos, fuera
+    )
+    return informe

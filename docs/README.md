@@ -30,7 +30,7 @@ docs/fase-N-nombre/
 | 2 | Repo, estructura y `.gitignore` | Cerrada — [`fase-2-repositorio/`](fase-2-repositorio/) |
 | 3 | Terraform: backend, S3, IAM, Glue DB, Athena | Cerrada — [`fase-3-terraform/`](fase-3-terraform/) |
 | 4 | Ingesta: Lambdas con reintentos | Cerrada — [`fase-4-ingesta/`](fase-4-ingesta/) |
-| 5 | Transformación: Glue + PySpark | En curso — 45 tests en verde, incluidos los dos días de cambio de hora con datos reales, pendiente de reingestar el 1 de marzo y de la primera ejecución en Glue — [`fase-5-transformacion/`](fase-5-transformacion/) |
+| 5 | Transformación: Glue + PySpark | En curso — 55 tests en verde, incluidos los dos días de cambio de hora con datos reales, pendiente de reingestar el 1 de marzo y de la primera ejecución en Glue — [`fase-5-transformacion/`](fase-5-transformacion/) |
 | 6 | Consulta: Athena | Pendiente |
 | 7 | Orquestación: Step Functions | Pendiente |
 | 8 | CI/CD: GitHub Actions | Pendiente |
