@@ -92,6 +92,19 @@ resource "aws_cloudwatch_log_group" "glue_curated" {
   retention_in_days = var.retencion_logs_dias
 }
 
+# Glue escribe la salida y los errores del driver y los ejecutores en estos dos
+# grupos, aparte del continuo de arriba. Se declaran aqui por lo mismo que el
+# resto: los que crea AWS por su cuenta nacen sin retencion y se pagan para
+# siempre. Y el rol no tiene logs:CreateLogGroup a proposito, asi que si no
+# existen no hay salida del driver, que es justo lo que se mira cuando el job
+# falla.
+resource "aws_cloudwatch_log_group" "glue_salida" {
+  for_each = toset(["output", "error"])
+
+  name              = "/aws-glue/jobs/${each.value}"
+  retention_in_days = var.retencion_logs_dias
+}
+
 # Proyección de particiones: Athena deduce las particiones del patrón de la
 # ruta. Sin crawler y sin MSCK REPAIR, que son las dos formas habituales de
 # pagar DPU o de que el catálogo se quede desfasado.

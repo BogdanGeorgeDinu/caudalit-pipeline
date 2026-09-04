@@ -75,6 +75,8 @@ data "aws_iam_policy_document" "glue_job" {
   }
 
   # DeleteObject permite reescribir una partición al reprocesar un día.
+  # Abort/ListParts hacen falta porque Spark sube en varias partes: sin ellos
+  # una escritura que supere el umbral de multipart falla a medias.
   statement {
     sid    = "EscribirCurated"
     effect = "Allow"
@@ -82,14 +84,19 @@ data "aws_iam_policy_document" "glue_job" {
       "s3:PutObject",
       "s3:GetObject",
       "s3:DeleteObject",
+      "s3:AbortMultipartUpload",
+      "s3:ListMultipartUploadParts",
     ]
     resources = ["${aws_s3_bucket.datos["curated"].arn}/*"]
   }
 
   statement {
-    sid       = "ListarCurated"
-    effect    = "Allow"
-    actions   = ["s3:ListBucket"]
+    sid    = "ListarCurated"
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+    ]
     resources = [aws_s3_bucket.datos["curated"].arn]
   }
 

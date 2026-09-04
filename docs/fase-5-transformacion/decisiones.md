@@ -17,7 +17,8 @@ hasta ahora.
 | `caudalit-esios-dev-curated` | Glue 5.0, 2 workers G.1X, timeout 15 min, sin reintentos |
 | `caudalit-esios-dev-artefactos` | Bucket para el script y los módulos del job |
 | Tabla `demanda_precio_temperatura` | Declarada en Terraform, con proyección de particiones |
-| Grupo de logs propio | Retención de 14 días |
+| Grupo de logs continuo | Retención de 14 días |
+| `/aws-glue/jobs/output` y `/error` | Salida del driver y los ejecutores, con retención |
 
 ## Decisiones
 
@@ -155,11 +156,20 @@ seguirá estando.
 
 La orquestación de la Fase 7 decidirá qué merece reintento, con criterio y con alerta.
 
-### 10. Tope de 15 minutos
+### 10. Los grupos de logs de Glue se declaran, no se dejan nacer solos
+Glue escribe el continuo en su grupo propio, pero la salida del driver y de los
+ejecutores va a `/aws-glue/jobs/output` y `/aws-glue/jobs/error`. No existían, y el rol
+no tiene `logs:CreateLogGroup` a propósito.
+
+Sin declararlos, el primer job habría corrido sin dejar salida del driver — justo lo que
+se mira cuando algo falla. Declarados en Terraform nacen además con retención; los que
+crea AWS por su cuenta no caducan nunca y se pagan para siempre.
+
+### 11. Tope de 15 minutos
 Glue factura por DPU-hora y no tiene capa gratuita. El `timeout` no está para que el
 job quepa, está para que un cuelgue no se convierta en una factura.
 
-### 11. `collect()` no devuelve la zona horaria que crees
+### 12. `collect()` no devuelve la zona horaria que crees
 La otra trampa horaria de la fase, esta al montar Spark en local para probar el job.
 
 Con `spark.sql.session.timeZone = UTC`, un `.show()` de la marca de REE imprime
