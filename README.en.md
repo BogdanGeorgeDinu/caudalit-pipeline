@@ -80,7 +80,7 @@ Both **public and token-free**. Verified before anything was designed.
 | 2 | [Repository and structure](docs/fase-2-repositorio/) | Done |
 | 3 | [Terraform: backend, S3, IAM, Glue DB, Athena](docs/fase-3-terraform/) | Done |
 | 4 | [Ingestion: Lambdas with retries](docs/fase-4-ingesta/) | Done |
-| 5 | Transformation: Glue + PySpark | In progress |
+| 5 | [Transformation: Glue + PySpark](docs/fase-5-transformacion/) | In progress |
 | 6 | Query: Athena | Pending |
 | 7 | Orchestration: Step Functions | Pending |
 | 8 | CI/CD: GitHub Actions | Pending |
