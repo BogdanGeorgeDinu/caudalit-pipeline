@@ -35,9 +35,12 @@ resource "aws_lambda_function" "ingesta" {
   runtime = "python3.13"
   handler = each.value.handler
 
-  # Holgado para absorber la espera de los reintentos. Se factura por ms
-  # consumidos, no por el timeout configurado.
-  timeout     = 300
+  # Dimensionado, no a ojo. Con 6 intentos, timeout HTTP de 25 s y esperas de
+  # 1,5+3+6+12+24 mas jitter, el peor caso de UNA peticion son 201,5 s. La
+  # Lambda de REE hace dos, o sea 403 s: con los 300 s de antes se moria antes
+  # de agotar los reintentos de la segunda. Se factura por ms consumidos, no
+  # por el timeout configurado, asi que subirlo no cuesta nada.
+  timeout     = 600
   memory_size = 256
 
   environment {

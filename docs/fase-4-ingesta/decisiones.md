@@ -75,10 +75,30 @@ idempotente y se puede repetir sin ensuciar el bucket.
 Sin parámetro `fecha`, se ingiere el día anterior: el actual todavía está incompleto
 y REE publica con retraso. El parámetro permite reprocesar cualquier fecha histórica.
 
-### 8. Timeout de 300 segundos
-Con seis intentos y espera exponencial, el peor caso se acerca a los minutos. Lambda
-factura por milisegundo consumido, no por el timeout configurado, así que un timeout
-holgado no cuesta nada y evita que la función muera a mitad de la cadena de reintentos.
+### 8. Timeout de 600 segundos, calculado y no estimado
+Estaba en 300 s con el argumento de que «el peor caso se acerca a los minutos». Se hizo
+la cuenta durante la Fase 5 y no salía:
+
+- 6 intentos × 25 s de timeout HTTP = 150 s
+- esperas de 1,5 + 3 + 6 + 12 + 24 = 46,5 s, más hasta 5 s de jitter
+- **peor caso de una petición: 201,5 s**
+
+La Lambda de clima hace una petición y cabe. **La de REE hace dos: 403 s.** Con 300 s
+moría antes de agotar los reintentos de la segunda, y precisamente contra la API que se
+sabe que falla sola. Con la primera petición en su peor caso, a la segunda solo le
+quedaban 3 de sus 6 intentos.
+
+Lambda factura por milisegundo consumido, no por el timeout configurado, así que subirlo
+a 600 s no cuesta nada. La lección es la de siempre en esta fase: la cuenta, no la
+intuición.
+
+### 9. Cada respuesta se guarda en cuanto llega
+La Lambda de REE pedía las dos series y solo después escribía las dos en S3. Si la
+segunda agotaba los reintentos, se perdía también la primera, que ya había llegado bien.
+
+Ahora cada respuesta se guarda nada más obtenerla. Reintentar el día solo tiene que
+recuperar la fuente que falta, y como la clave en S3 es determinista, repetir la que ya
+está simplemente la sobrescribe con lo mismo.
 
 ## Prueba realizada
 Invocación real de ambas funciones sobre el 1 de marzo de 2024:

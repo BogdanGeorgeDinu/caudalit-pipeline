@@ -20,13 +20,15 @@ def handler(event, context):
     }
     log("inicio", fuente="ree", fecha=dia.isoformat())
 
+    # Cada respuesta se guarda en cuanto llega, no las dos al final. Son dos
+    # peticiones a una API que falla sola: si la segunda agota los reintentos y
+    # la Lambda se queda sin tiempo, la primera ya esta a salvo en S3 y solo hay
+    # que reintentar la que falta.
     demanda = pedir_json(f"{BASE}/demanda/evolucion", {**rango, **GEO}, "ree_demanda")
-    precio = pedir_json(f"{BASE}/mercados/precios-mercados-tiempo-real", rango, "ree_precio")
+    claves = [guardar("ree_demanda", dia, demanda)]
 
-    claves = [
-        guardar("ree_demanda", dia, demanda),
-        guardar("ree_precio", dia, precio),
-    ]
+    precio = pedir_json(f"{BASE}/mercados/precios-mercados-tiempo-real", rango, "ree_precio")
+    claves.append(guardar("ree_precio", dia, precio))
 
     log("fin", fuente="ree", fecha=dia.isoformat(), claves=claves)
     return {"fecha": dia.isoformat(), "claves": claves}
