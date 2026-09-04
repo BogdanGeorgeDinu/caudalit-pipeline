@@ -100,6 +100,20 @@ Ahora cada respuesta se guarda nada más obtenerla. Reintentar el día solo tien
 recuperar la fuente que falta, y como la clave en S3 es determinista, repetir la que ya
 está simplemente la sobrescribe con lo mismo.
 
+## Pruebas
+La ingesta se quedó sin pruebas en su momento: toda la suite miraba la transformación,
+justo la parte que no habla con una API que se sabe que falla sola. Se cubrió al
+revisarla en la Fase 5, con **14 tests** sin red y sin AWS —`boto3` se sustituye por un
+doble antes de importar el módulo, y `urlopen` y `sleep` también—:
+
+- el reintento ante 400 hasta que la API responde 200;
+- que la espera crece 1,5 · 3 · 6 y que el jitter desincroniza dos ejecuciones;
+- que al agotar los intentos falla en alto y deja el motivo del último fallo;
+- que un JSON inválido también se reintenta;
+- que la clave en S3 es determinista y lleva los ceros delante;
+- que la Lambda de REE guarda la demanda **antes** de pedir el precio;
+- que la de clima pide en UTC y cubre también la víspera.
+
 ## Prueba realizada
 Invocación real de ambas funciones sobre el 1 de marzo de 2024:
 

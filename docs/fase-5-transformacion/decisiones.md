@@ -244,8 +244,9 @@ Esto último **la ingesta anterior no podía hacerlo**. Pidiendo la temperatura 
 segundo fallo silencioso, independiente del desfase de invierno, que el cambio a UTC
 arregla de paso.
 
-Son **55 tests**: 37 sin Spark, que corren en milisegundos, y 18 que levantan una
-sesión local. Los de Spark se saltan solos si PySpark no está instalado.
+La suite completa son **69 tests**: 51 sin Spark, que corren en milisegundos, y 18 que
+levantan una sesión local. De ellos, 14 cubren la ingesta y pertenecen a la Fase 4, que
+no tenía ninguno. Los de Spark se saltan solos si PySpark no está instalado.
 
 ## Lo que sigue sin probarse
 El job **no se ha ejecutado en Glue**. Queda por confirmar en la primera ejecución
@@ -266,7 +267,7 @@ Esa ejecución cuesta unos cuatro céntimos.
 ## Cómo se ejecutan las pruebas
 
 ```bash
-# Rapido, sin Spark: 37 tests en milisegundos
+# Rapido, sin Spark: 51 tests (los 18 de Spark se saltan solos)
 python3 -m unittest discover -s tests
 
 # Completo, con Spark local
