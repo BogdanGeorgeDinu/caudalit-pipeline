@@ -258,10 +258,29 @@ PySpark necesita Python 3.11 o 3.12 y Java 17. Si el worker y el driver usan
 versiones distintas de Python, Spark falla con `PYTHON_VERSION_MISMATCH`: de ahí
 que haya que fijar `PYSPARK_PYTHON` explícitamente.
 
-## Observación que queda para más adelante
-Cada `terraform plan` marca las dos Lambdas como modificadas aunque su código no haya
-cambiado: `archive_file` regenera el zip con un hash distinto. Es inofensivo —
-redesplegar una Lambda es gratis— pero ensucia el plan y hace que nunca esté limpio.
+## Herramientas de la fase
+Dos scripts en `herramientas/`, los dos sin Spark y sin AWS:
+
+- `revisar_dia.py <carpeta_raw> <fecha>` — cruza y valida un día de datos crudos y
+  saca la tabla y el informe de calidad. Sirve para diagnosticar un día sospechoso
+  sin gastar un DPU.
+- `comprobar_desfase.py [fechas...]` — pide el mismo día a Open-Meteo en
+  `Europe/Madrid` y en `UTC` y mide las dos lecturas posibles de la etiqueta contra
+  la verdad de referencia. Es lo que destapó el fallo, y queda para poder repetir la
+  medición si la API cambia de criterio.
+
+## Una observación que resultó ser falsa
+Estaba anotado que cada `terraform plan` marcaba las dos Lambdas como modificadas
+aunque su código no hubiera cambiado, por culpa de `archive_file`, y que había que
+convivir con un plan que nunca queda limpio.
+
+Se comprobó y **no es cierto**. `output_base64sha256` es determinista sobre el
+contenido: tres `plan` consecutivos borrando el zip entre medias dan el mismo hash, y
+tocar el `mtime` de los tres ficheros sin cambiar una línea tampoco lo altera.
+
+El cambio que el plan marca ahora es real: `openmeteo.py` pasó a pedir los datos en UTC.
+Después del próximo `apply` el plan debería quedar limpio; conviene confirmarlo entonces
+y no volver a dar por buena una rugosidad sin medirla.
 
 ## Coste
 El primer gasto real del proyecto que no es calderilla.

@@ -50,7 +50,7 @@ def main():
     filas = parseo.unir(
         parseo.demanda(crudos["ree_demanda"]) if crudos["ree_demanda"] else [],
         parseo.precio(crudos["ree_precio"]) if crudos["ree_precio"] else [],
-        parseo.temperatura(crudos["clima_temperatura"]) if crudos["clima_temperatura"] else [],
+        parseo.temperatura(crudos["clima_temperatura"], dia) if crudos["clima_temperatura"] else [],
     )
 
     cabecera = f"{'hora local':>10}  {'UTC':>16}  {'MW':>10}  {'PVPC':>8}  {'spot':>8}  {'°C':>6}"

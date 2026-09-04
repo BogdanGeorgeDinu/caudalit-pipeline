@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Fase 5</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1200px;height:630px;background:#07161A;color:#E7F1F0;overflow:hidden;
+  font-family:"IBM Plex Sans",system-ui,sans-serif;padding:44px 54px;display:flex;flex-direction:column}
+.top{display:flex;align-items:baseline;justify-content:space-between}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.18em;
+  text-transform:uppercase;color:#65E6D8;display:flex;align-items:center;gap:11px}
+.eyebrow::before{content:"";width:28px;height:2px;background:#2FD6C6;border-radius:2px}
+.brand{font-family:"Sora",sans-serif;font-weight:700;font-size:19px;letter-spacing:-.02em}
+.brand .it{color:#65E6D8}
+h1{font-family:"Sora",sans-serif;font-weight:800;font-size:41px;letter-spacing:-.035em;
+  line-height:1.05;margin:14px 0 6px}
+h1 .flow{background:linear-gradient(100deg,#2FD6C6,#43C0F0);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:#8AA5A5;font-size:16.5px;margin-bottom:10px}
+.figbox{flex:1;background:#0D2025;border:1px solid #1C363C;border-radius:16px;
+  padding:8px 18px;display:flex;align-items:center}
+svg{width:100%;height:auto;display:block}
+</style></head><body>
+<div class="top">
+  <span class="eyebrow">Fase 5 de 10 &middot; Transformaci&oacute;n</span>
+  <span class="brand">Caudal<span class="it">it</span></span>
+</div>
+<h1>El m&iacute;nimo ca&iacute;a <span class="flow">una hora tarde.</span></h1>
+<p class="sub">Nada fallaba y 28 tests estaban en verde &middot; pipeline de datos en AWS, construido en abierto</p>
+<div class="figbox"><svg viewBox="0 0 1000 340" role="img" aria-label="Temperatura horaria en Madrid el 1 de marzo de 2024, dos series. La correcta marca su minimo de 2,1 grados a las 08:00, trece minutos despues del amanecer de las 07:47. La desplazada una hora, que es la que producia el pipeline antes del arreglo, lo marca a las 09:00, una hora y trece minutos despues del amanecer. A partir del mediodia las dos curvas se separan visiblemente.">
+<line x1="54" y1="282.9" x2="936" y2="282.9" stroke="#1C363C" stroke-width="1"/>
+<text x="44" y="286.4" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">2</text>
+<line x1="54" y1="239.3" x2="936" y2="239.3" stroke="#1C363C" stroke-width="1"/>
+<text x="44" y="242.8" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">4</text>
+<line x1="54" y1="195.7" x2="936" y2="195.7" stroke="#1C363C" stroke-width="1"/>
+<text x="44" y="199.2" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">6</text>
+<line x1="54" y1="152.1" x2="936" y2="152.1" stroke="#1C363C" stroke-width="1"/>
+<text x="44" y="155.6" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">8</text>
+<line x1="54" y1="108.5" x2="936" y2="108.5" stroke="#1C363C" stroke-width="1"/>
+<text x="44" y="112.0" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">10</text>
+<line x1="54" y1="64.9" x2="936" y2="64.9" stroke="#1C363C" stroke-width="1"/>
+<text x="44" y="68.4" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">12</text>
+<text x="44" y="42.2" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">°C</text>
+<text x="54.0" y="316" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">00:00</text>
+<text x="207.4" y="316" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">04:00</text>
+<text x="514.2" y="316" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">12:00</text>
+<text x="667.6" y="316" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">16:00</text>
+<text x="821.0" y="316" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">20:00</text>
+<text x="936.0" y="316" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">23:00</text>
+<text x="495.0" y="335" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5C7375">hora local de Madrid · 1 de marzo de 2024</text>
+<line x1="352.5" y1="191.3" x2="352.5" y2="296" stroke="#8AA5A5" stroke-width="1" stroke-dasharray="3 4" opacity=".55"/>
+<text x="352.5" y="182.6" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8AA5A5">amanecer 07:47</text>
+<path d="M54.0,200.1 L92.3,224.0 L130.7,241.5 L169.0,243.7 L207.4,243.7 L245.7,261.1 L284.1,261.1 L322.4,267.7 L360.8,278.6 L399.1,280.7 L437.5,245.9 L475.8,206.6 L514.2,169.5 L552.5,119.4 L590.9,80.1 L629.2,75.8 L667.6,73.6 L705.9,60.5 L744.3,62.7 L782.6,80.1 L821.0,119.4 L859.3,143.4 L897.7,167.4 L936.0,178.3" fill="none" stroke="#db6c5d" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M54.0,224.0 L92.3,241.5 L130.7,243.7 L169.0,243.7 L207.4,261.1 L245.7,261.1 L284.1,267.7 L322.4,278.6 L360.8,280.7 L399.1,245.9 L437.5,206.6 L475.8,169.5 L514.2,119.4 L552.5,80.1 L590.9,75.8 L629.2,73.6 L667.6,60.5 L705.9,62.7 L744.3,80.1 L782.6,119.4 L821.0,143.4 L859.3,167.4 L897.7,178.3 L936.0,184.8" fill="none" stroke="#00a99d" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="399.1" cy="280.7" r="5.5" fill="#db6c5d" stroke="#0D2025" stroke-width="2"/>
+<circle cx="360.8" cy="280.7" r="5.5" fill="#00a99d" stroke="#0D2025" stroke-width="2"/>
+<line x1="407.1" y1="258.7" x2="401.1" y2="272.7" stroke="#db6c5d" stroke-width="1"/>
+<text x="409.1" y="254.7" font-family="IBM Plex Mono, monospace" font-size="11" fill="#E7F1F0">09:00</text>
+<text x="360.8" y="303.7" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#E7F1F0">08:00 · 2,1 °C</text>
+<line x1="68" y1="39.1" x2="90" y2="39.1" stroke="#00a99d" stroke-width="2.5"/>
+<text x="98" y="43.1" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Correcta</text>
+<text x="194" y="43.1" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">minimo 13 min tras el amanecer</text>
+<line x1="68" y1="60.1" x2="90" y2="60.1" stroke="#db6c5d" stroke-width="2.5" stroke-dasharray="5 4"/>
+<text x="98" y="64.1" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="#E7F1F0">Desplazada 1 h</text>
+<text x="226" y="64.1" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8AA5A5">lo que producia el pipeline</text>
+</svg>
+</div>
+</body></html>
